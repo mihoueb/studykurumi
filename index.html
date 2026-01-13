@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>くるみも!漢字カード</title>
-
   <style>
     * {
       margin: 0;
@@ -13,17 +12,8 @@
     }
 
     body {
-      font-family: "UD デジタル 教科書体 NK-R",
-                   "UD Digi Kyokasho NK-R",
-                   "Meiryo",
-                   "Yu Gothic",
-                   sans-serif;
-      background: linear-gradient(
-        135deg,
-        #ff9ad5 0%,
-        #d6a4ff 50%,
-        #ffe1f3 100%
-      );
+      font-family: 'UD デジタル 教科書体 NK-R', 'Yu Mincho', 'YuMincho', 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', serif;
+      background: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%);
       min-height: 100vh;
       padding: 20px;
     }
@@ -35,50 +25,84 @@
 
     h1 {
       text-align: center;
-      color: #c84fd6;
-      font-size: 2.5em;
-      text-shadow:
-        2px 2px 0 #ffb3ec,
-        5px 5px 0 rgba(200, 79, 214, 0.3);
+      background: linear-gradient(135deg, #FF69B4, #DA70D6, #FF69B4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.2em;
+      text-shadow: none;
       margin-bottom: 30px;
+      animation: bounce 2s infinite;
+      filter: drop-shadow(3px 3px 0px rgba(255, 182, 217, 0.5));
+    }
+
+    h1 .small-text {
+      font-size: 0.7em;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     .menu {
       background: white;
-      border-radius: 30px;
-      padding: 35px;
-      box-shadow: 0 15px 35px rgba(200, 79, 214, 0.35);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
       margin-bottom: 20px;
     }
 
-    /* h2 は完全に使わないのでスタイルも不要 */
+    .menu h2 {
+      color: #FF69B4;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
 
     .button-group {
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 15px;
     }
 
     .mode-btn {
-      background: linear-gradient(
-        135deg,
-        #ff66cc,
-        #a855f7
-      );
+      background: linear-gradient(135deg, #FF69B4, #DA70D6, #B19CD9);
       color: white;
       border: none;
-      padding: 22px;
-      border-radius: 18px;
+      padding: 20px;
+      border-radius: 15px;
       font-size: 1.3em;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 18px rgba(168, 85, 247, 0.4);
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(218, 112, 214, 0.4);
+    }
+
+    .mode-btn:nth-child(1) {
+      background: linear-gradient(135deg, #FF69B4, #FF1493, #DA70D6);
+    }
+
+    .mode-btn:nth-child(2) {
+      background: linear-gradient(135deg, #DA70D6, #BA55D3, #9370DB);
+    }
+
+    .mode-btn:nth-child(3) {
+      background: linear-gradient(135deg, #FF69B4, #FF85C1, #FFB6D9);
+    }
+
+    .mode-btn:nth-child(4) {
+      background: linear-gradient(135deg, #9370DB, #8A2BE2, #BA55D3);
     }
 
     .mode-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 25px rgba(168, 85, 247, 0.5);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(218, 112, 214, 0.6);
+    }
+
+    .mode-btn:active {
+      transform: translateY(0);
     }
 
     .card-container {
@@ -86,16 +110,13 @@
     }
 
     .card {
-      background: linear-gradient(
-        180deg,
-        #ffffff,
-        #fff1fa
-      );
-      border-radius: 30px;
+      background: white;
+      border-radius: 25px;
       padding: 60px 40px;
       min-height: 400px;
-      box-shadow: 0 15px 35px rgba(200, 79, 214, 0.35);
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
@@ -106,8 +127,17 @@
       margin-bottom: 20px;
     }
 
-    .card-front,
-    .card-back {
+    .card.flipped .card-front {
+      transform: rotateY(180deg);
+      opacity: 0;
+    }
+
+    .card.flipped .card-back {
+      transform: rotateY(0deg);
+      opacity: 1;
+    }
+
+    .card-front, .card-back {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -115,8 +145,8 @@
       justify-content: center;
       align-items: center;
       padding: 40px;
-      backface-visibility: hidden;
       transition: all 0.6s;
+      backface-visibility: hidden;
     }
 
     .card-back {
@@ -124,39 +154,35 @@
       opacity: 0;
     }
 
-    .card.flipped .card-front {
-      transform: rotateY(180deg);
-      opacity: 0;
-    }
-
-    .card.flipped .card-back {
-      transform: rotateY(0);
-      opacity: 1;
-    }
-
     .question-text {
       font-size: 1.8em;
       line-height: 1.8;
-      color: #444;
+      color: #333;
     }
 
     .answer-text {
       font-size: 3.5em;
-      color: #c84fd6;
+      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       font-weight: bold;
     }
 
     .card-info {
+      margin-bottom: 15px;
       text-align: center;
-      color: #a855f7;
+      background: linear-gradient(135deg, #FF69B4, #DA70D6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       font-size: 1.2em;
       font-weight: bold;
-      margin-bottom: 15px;
     }
 
     .accuracy {
       font-size: 0.9em;
-      color: #888;
+      color: #999;
       margin-top: 5px;
     }
 
@@ -169,92 +195,322 @@
 
     .answer-btn {
       flex: 1;
-      max-width: 260px;
-      padding: 26px;
+      max-width: 250px;
+      padding: 25px;
       font-size: 1.5em;
       font-weight: bold;
       border: none;
-      border-radius: 18px;
+      border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s;
-      color: white;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .correct-btn {
-      background: linear-gradient(
-        135deg,
-        #ff8ad8,
-        #c084fc
-      );
-      box-shadow: 0 8px 18px rgba(192, 132, 252, 0.5);
+      background: linear-gradient(135deg, #FFB6D9, #FF69B4, #DA70D6);
+      color: white;
     }
 
     .wrong-btn {
-      background: linear-gradient(
-        135deg,
-        #cfcfcf,
-        #e9e9e9
-      );
-      color: #777;
+      background: linear-gradient(135deg, #D4A5F5, #B19CD9, #9370DB);
+      color: white;
     }
 
     .answer-btn:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .answer-btn:active {
+      transform: translateY(0);
     }
 
     .result {
       display: none;
       background: white;
-      border-radius: 30px;
+      border-radius: 25px;
       padding: 40px;
-      box-shadow: 0 15px 35px rgba(200, 79, 214, 0.35);
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
       text-align: center;
     }
 
     .result h2 {
-      color: #c84fd6;
-      font-size: 2.4em;
+      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.5em;
+      margin-bottom: 30px;
+    }
+
+    .result-stats {
+      font-size: 1.5em;
+      color: #333;
       margin-bottom: 30px;
     }
 
     .back-btn {
-      background: linear-gradient(
-        135deg,
-        #ff66cc,
-        #a855f7
-      );
+      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
       color: white;
       border: none;
-      padding: 22px 45px;
-      border-radius: 18px;
+      padding: 20px 40px;
+      border-radius: 15px;
       font-size: 1.3em;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 8px 18px rgba(168, 85, 247, 0.4);
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(218, 112, 214, 0.4);
+    }
+
+    .back-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(218, 112, 214, 0.6);
     }
 
     .loading {
       text-align: center;
-      color: #c84fd6;
+      background: linear-gradient(135deg, #FF69B4, #DA70D6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       font-size: 1.5em;
       margin-top: 50px;
     }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+      .question-text {
+        font-size: 1.4em;
+      }
+      .answer-text {
+        font-size: 2.5em;
+      }
+      .button-container {
+        flex-direction: column;
+      }
+      .answer-btn {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
-
 <body>
   <div class="container">
-    <h1>🌸 くるみも!漢字カード 🌸</h1>
+    <h1>🦄 <span class="small-text">くるみも!</span>漢字カード 💖</h1>
 
     <div id="menu" class="menu">
-      <!-- 見出し削除済み -->
       <div class="button-group">
         <button class="mode-btn" onclick="startMode('normal')">📚 じゅんばんモード</button>
         <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
-        <button class="mode-btn" onclick="startMode('wasurenai')">💪 わすれないぞモード</button>
-        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード</button>
+        <button class="mode-btn" onclick="startMode('wasurenai')">💪 わすれないぞモード (80%いか)</button>
+        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (50%いか)</button>
       </div>
     </div>
+
+    <div id="cardContainer" class="card-container">
+      <div class="card-info">
+        <span id="progress">1 / 20</span>
+        <div class="accuracy" id="accuracy">せいとうりつ: --%</div>
+      </div>
+      <div class="card" id="card" onclick="flipCard()">
+        <div class="card-front">
+          <div class="question-text" id="question"></div>
+        </div>
+        <div class="card-back">
+          <div class="answer-text" id="answer"></div>
+        </div>
+      </div>
+      <div class="button-container">
+        <button class="answer-btn correct-btn" onclick="answerQuestion(true)">✨ かけた!</button>
+        <button class="answer-btn wrong-btn" onclick="answerQuestion(false)">💦 かけなかった</button>
+      </div>
+    </div>
+
+    <div id="result" class="result">
+      <h2>🎉 おつかれさま! 🎉</h2>
+      <div class="result-stats" id="resultStats"></div>
+      <button class="back-btn" onclick="backToMenu()">メニューにもどる</button>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+      よみこみちゅう... 💖
+    </div>
   </div>
+
+  <script>
+    // Google Apps Script のウェブアプリURL
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIpsYG55zXaoBFQIMUrQpk78YZkbFIYnw5qFdEqdlzHES2iJtcYS2jxGC3rRmmBQRlkQ/exec';
+
+    let allQuestions = [];
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let isFlipped = false;
+    let currentMode = '';
+
+    // 初期読み込み
+    window.addEventListener('load', () => {
+      loadData();
+    });
+
+    // データ読み込み
+    async function loadData() {
+      document.getElementById('loading').style.display = 'block';
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        allQuestions = data;
+        document.getElementById('loading').style.display = 'none';
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+        alert('データの読み込みに失敗しました。もう一度試してください。');
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function startMode(mode) {
+      currentMode = mode;
+      let questions = [...allQuestions];
+
+      // モード別フィルタリング
+      if (mode === 'wasurenai') {
+        questions = questions.filter(q => {
+          if (q.total === 0) return true;
+          const accuracy = (q.correct / q.total) * 100;
+          return accuracy <= 80;
+        });
+      } else if (mode === 'oboeru') {
+        questions = questions.filter(q => {
+          if (q.total === 0) return true;
+          const accuracy = (q.correct / q.total) * 100;
+          return accuracy <= 50;
+        });
+      }
+
+      if (questions.length === 0) {
+        alert('もんだいがありません!すごい!ぜんぶおぼえたね!🎉');
+        return;
+      }
+
+      // ランダムモード
+      if (mode === 'random') {
+        questions = shuffleArray(questions);
+      }
+
+      // 20問まで
+      currentQuestions = questions.slice(0, Math.min(20, questions.length));
+      currentIndex = 0;
+      correctCount = 0;
+
+      document.getElementById('menu').style.display = 'none';
+      document.getElementById('cardContainer').style.display = 'block';
+      showQuestion();
+    }
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function showQuestion() {
+      if (currentIndex >= currentQuestions.length) {
+        showResult();
+        return;
+      }
+
+      const q = currentQuestions[currentIndex];
+      document.getElementById('question').innerText = q.question;
+      document.getElementById('answer').innerText = q.answer;
+      document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentQuestions.length}`;
+      
+      // 正答率表示
+      if (q.total > 0) {
+        const accuracy = Math.round((q.correct / q.total) * 100);
+        document.getElementById('accuracy').innerText = `せいとうりつ: ${accuracy}%`;
+      } else {
+        document.getElementById('accuracy').innerText = 'せいとうりつ: --% (はじめて)';
+      }
+
+      isFlipped = false;
+      document.getElementById('card').classList.remove('flipped');
+    }
+
+    function flipCard() {
+      isFlipped = !isFlipped;
+      document.getElementById('card').classList.toggle('flipped');
+    }
+
+    async function answerQuestion(isCorrect) {
+      if (!isFlipped) {
+        alert('カードをクリックしてこたえをかくにんしてね!');
+        return;
+      }
+
+      if (isCorrect) {
+        correctCount++;
+      }
+
+      // スプレッドシートに記録
+      const q = currentQuestions[currentIndex];
+      await updateGoogleSheet(q.row, isCorrect);
+
+      // ローカルデータも更新
+      const questionIndex = allQuestions.findIndex(item => item.row === q.row);
+      if (questionIndex !== -1) {
+        if (isCorrect) {
+          allQuestions[questionIndex].correct++;
+        }
+        allQuestions[questionIndex].total++;
+      }
+
+      currentIndex++;
+      showQuestion();
+    }
+
+    async function updateGoogleSheet(row, isCorrect) {
+      try {
+        const url = `${SCRIPT_URL}?action=update&row=${row}&correct=${isCorrect}`;
+        await fetch(url);
+      } catch (error) {
+        console.error('記録エラー:', error);
+      }
+    }
+
+    function showResult() {
+      document.getElementById('cardContainer').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      
+      const percentage = Math.round((correctCount / currentQuestions.length) * 100);
+      let message = '';
+      
+      if (percentage >= 90) {
+        message = 'すごい!かんぺき! 🌟';
+      } else if (percentage >= 70) {
+        message = 'よくがんばったね! 💮';
+      } else if (percentage >= 50) {
+        message = 'もうすこし! 📝';
+      } else {
+        message = 'つぎはがんばろう! 💪';
+      }
+
+      document.getElementById('resultStats').innerHTML = `
+        <div style="font-size: 2em; margin-bottom: 20px;">${message}</div>
+        <div>かけた: ${correctCount} / ${currentQuestions.length}</div>
+        <div>せいとうりつ: ${percentage}%</div>
+      `;
+    }
+
+    function backToMenu() {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('menu').style.display = 'block';
+      loadData(); // データを再読み込み
+    }
+  </script>
 </body>
 </html>

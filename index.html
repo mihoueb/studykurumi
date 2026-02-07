@@ -12,7 +12,7 @@
     }
 
     body {
-      font-family: 'UD デジタル 教科書体 NK-R', 'Yu Mincho', 'YuMincho', 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', serif;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', 'HiraginoMinchoPron', 'HGP創英角ﾎﾟｯﾌﾟ体', serif;
       background: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%);
       min-height: 100vh;
       padding: 20px;
@@ -92,10 +92,6 @@
       background: linear-gradient(135deg, #FF69B4, #FF85C1, #FFB6D9);
     }
 
-    .mode-btn:nth-child(4) {
-      background: linear-gradient(135deg, #9370DB, #8A2BE2, #BA55D3);
-    }
-
     .mode-btn:hover {
       transform: translateY(-3px) scale(1.02);
       box-shadow: 0 8px 25px rgba(218, 112, 214, 0.6);
@@ -155,18 +151,23 @@
     }
 
     .question-text {
-      font-size: 1.8em;
-      line-height: 1.8;
+      font-size: 2.2em;
+      line-height: 2;
       color: #333;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
+      font-weight: 500;
+      letter-spacing: 0.1em;
     }
 
     .answer-text {
-      font-size: 3.5em;
+      font-size: 4.5em;
       background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       font-weight: bold;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
+      letter-spacing: 0.15em;
     }
 
     .card-info {
@@ -282,10 +283,11 @@
         font-size: 1.8em;
       }
       .question-text {
-        font-size: 1.4em;
+        font-size: 2em;
+        line-height: 1.9;
       }
       .answer-text {
-        font-size: 2.5em;
+        font-size: 3.8em;
       }
       .button-container {
         flex-direction: column;
@@ -304,14 +306,13 @@
       <div class="button-group">
         <button class="mode-btn" onclick="startMode('normal')">📚 じゅんばんモード</button>
         <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
-        <button class="mode-btn" onclick="startMode('wasurenai')">💪 わすれないぞモード (80%いか)</button>
-        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (50%いか)</button>
+        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (100%いか)</button>
       </div>
     </div>
 
     <div id="cardContainer" class="card-container">
       <div class="card-info">
-        <span id="progress">1 / 20</span>
+        <span id="progress">1 / 40</span>
         <div class="accuracy" id="accuracy">せいとうりつ: --%</div>
       </div>
       <div class="card" id="card" onclick="flipCard()">
@@ -375,32 +376,33 @@
       let questions = [...allQuestions];
 
       // モード別フィルタリング
-      if (mode === 'wasurenai') {
+      if (mode === 'oboeru') {
+        // 正答率100%以下のものを全部選ぶ
         questions = questions.filter(q => {
-          if (q.total === 0) return true;
+          if (q.total === 0) return true; // 未回答は含める
           const accuracy = (q.correct / q.total) * 100;
-          return accuracy <= 80;
+          return accuracy < 100; // 100%未満
         });
-      } else if (mode === 'oboeru') {
-        questions = questions.filter(q => {
-          if (q.total === 0) return true;
-          const accuracy = (q.correct / q.total) * 100;
-          return accuracy <= 50;
-        });
+        // ランダムに出題
+        questions = shuffleArray(questions);
+      } else if (mode === 'random') {
+        // ランダムモード
+        questions = shuffleArray(questions);
       }
+      // normalモードは順番のまま
 
       if (questions.length === 0) {
         alert('もんだいがありません!すごい!ぜんぶおぼえたね!🎉');
         return;
       }
 
-      // ランダムモード
-      if (mode === 'random') {
-        questions = shuffleArray(questions);
+      // 40問まで（じゅんばんモードとランダムモード）、おぼえるぞモードは全部
+      let maxQuestions = 40;
+      if (mode === 'oboeru') {
+        maxQuestions = questions.length; // すべて出題
       }
 
-      // 10問まで
-      currentQuestions = questions.slice(0, Math.min(10, questions.length));
+      currentQuestions = questions.slice(0, Math.min(maxQuestions, questions.length));
       currentIndex = 0;
       correctCount = 0;
 

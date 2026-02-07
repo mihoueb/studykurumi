@@ -377,11 +377,11 @@
 
       // モード別フィルタリング
       if (mode === 'oboeru') {
-        // 正答率100%以下のものを全部選ぶ
+        // 正答率99%以下のものを全部選ぶ
         questions = questions.filter(q => {
           if (q.total === 0) return true; // 未回答は含める
           const accuracy = (q.correct / q.total) * 100;
-          return accuracy < 100; // 100%未満
+          return accuracy < 99; // 100%未満
         });
         // ランダムに出題
         questions = shuffleArray(questions);

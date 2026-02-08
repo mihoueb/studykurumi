@@ -12,7 +12,7 @@
     }
 
     body {
-      font-family: 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', 'HiraginoMinchoPron', 'HGP創英角ﾎﾟｯﾌﾟ体', serif;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', 'HiraginoMinchoPron', 'HGP創英角ﾎﾟｯﾌﾟ体', serif;
       background: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%);
       min-height: 100vh;
       padding: 20px;
@@ -154,7 +154,7 @@
       font-size: 2.2em;
       line-height: 2;
       color: #333;
-      font-family: 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
       font-weight: 500;
       letter-spacing: 0.1em;
     }
@@ -166,7 +166,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       font-weight: bold;
-      font-family: 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', 'Hiragino Mincho ProN', serif;
       letter-spacing: 0.15em;
     }
 
@@ -278,6 +278,52 @@
       margin-top: 50px;
     }
 
+    .weak-points {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .weak-point-item {
+      background: linear-gradient(135deg, #FFE5F1, #FFF0F6);
+      border-left: 5px solid #FF69B4;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .weak-point-question {
+      font-size: 1.3em;
+      color: #333;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', serif;
+      flex: 1;
+    }
+
+    .weak-point-answer {
+      font-size: 1.8em;
+      color: #FF69B4;
+      font-weight: bold;
+      font-family: 'HG正楷書体-PRO', 'HGSeikaishotaiPRO', 'UD デジタル 教科書体 NK-R', serif;
+      margin-left: 20px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .weak-point-accuracy {
+      font-size: 1.1em;
+      color: #DA70D6;
+      font-weight: bold;
+      margin-left: 20px;
+      min-width: 80px;
+      text-align: right;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.8em;
@@ -306,7 +352,8 @@
       <div class="button-group">
         <button class="mode-btn" onclick="startMode('normal')">📚 じゅんばんモード</button>
         <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
-        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (100%いか)</button>
+        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (99%いか)</button>
+        <button class="mode-btn" onclick="showWeakPoints()">📊 じゃくてんかくにん</button>
       </div>
     </div>
 
@@ -333,6 +380,12 @@
       <h2>🎉 おつかれさま! 🎉</h2>
       <div class="result-stats" id="resultStats"></div>
       <button class="back-btn" onclick="backToMenu()">メニューにもどる</button>
+    </div>
+
+    <div id="weakPoints" class="weak-points" style="display: none;">
+      <button class="back-btn" style="margin-bottom: 20px;" onclick="backToMenu()">メニューにもどる</button>
+      <h2 style="color: #FF69B4; text-align: center; margin-bottom: 30px;">📊 じゃくてんかくにん</h2>
+      <div id="weakPointsList" style="background: white; border-radius: 25px; padding: 30px; box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);"></div>
     </div>
 
     <div id="loading" class="loading" style="display: none;">
@@ -381,7 +434,7 @@
         questions = questions.filter(q => {
           if (q.total === 0) return true; // 未回答は含める
           const accuracy = (q.correct / q.total) * 100;
-          return accuracy < 99; // 100%未満
+          return accuracy <= 99; // 99%以下
         });
         // ランダムに出題
         questions = shuffleArray(questions);
@@ -510,8 +563,68 @@
 
     function backToMenu() {
       document.getElementById('result').style.display = 'none';
+      document.getElementById('weakPoints').style.display = 'none';
       document.getElementById('menu').style.display = 'block';
       loadData(); // データを再読み込み
+    }
+
+    function showWeakPoints() {
+      // 正答率順にソート
+      let sortedQuestions = [...allQuestions].sort((a, b) => {
+        // 未回答は最後
+        if (a.total === 0 && b.total === 0) return 0;
+        if (a.total === 0) return 1;
+        if (b.total === 0) return -1;
+
+        // 正答率が低い順
+        const accuracyA = (a.correct / a.total) * 100;
+        const accuracyB = (b.correct / b.total) * 100;
+        return accuracyA - accuracyB;
+      });
+
+      // 80%未満の問題のみを抽出
+      let weakQuestions = sortedQuestions.filter(q => {
+        if (q.total === 0) return true; // 未回答は含める
+        const accuracy = (q.correct / q.total) * 100;
+        return accuracy < 80; // 80%未満のみ
+      });
+
+      if (weakQuestions.length === 0) {
+        document.getElementById('weakPointsList').innerHTML = '<div style="text-align: center; font-size: 1.5em; color: #FF69B4; padding: 40px;">すべての問題が80%以上です!すごい!🎉</div>';
+      } else {
+        // HTMLを生成
+        let html = '';
+        weakQuestions.forEach((q, index) => {
+          let accuracyText = '';
+          let accuracyColor = '';
+
+          if (q.total === 0) {
+            accuracyText = '未回答';
+            accuracyColor = '#999';
+          } else {
+            const accuracy = Math.round((q.correct / q.total) * 100);
+            accuracyText = `${accuracy}%`;
+            if (accuracy >= 60) {
+              accuracyColor = '#FFC107';
+            } else {
+              accuracyColor = '#FF6B6B';
+            }
+          }
+
+          html += `
+            <div class="weak-point-item">
+              <div class="weak-point-question">${index + 1}. ${q.question}</div>
+              <div class="weak-point-answer">${q.answer}</div>
+              <div class="weak-point-accuracy" style="color: ${accuracyColor};">${accuracyText}</div>
+            </div>
+          `;
+        });
+
+        document.getElementById('weakPointsList').innerHTML = html;
+      }
+
+      document.getElementById('menu').style.display = 'none';
+      document.getElementById('weakPoints').style.display = 'block';
     }
   </script>
 </body>

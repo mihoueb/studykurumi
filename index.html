@@ -85,10 +85,14 @@
     }
 
     .mode-btn:nth-child(2) {
-      background: linear-gradient(135deg, #DA70D6, #BA55D3, #9370DB);
+      background: linear-gradient(135deg, #FF85C1, #FF69B4, #DA70D6);
     }
 
     .mode-btn:nth-child(3) {
+      background: linear-gradient(135deg, #DA70D6, #BA55D3, #9370DB);
+    }
+
+    .mode-btn:nth-child(4) {
       background: linear-gradient(135deg, #FF69B4, #FF85C1, #FFB6D9);
     }
 
@@ -350,7 +354,8 @@
 
     <div id="menu" class="menu">
       <div class="button-group">
-        <button class="mode-btn" onclick="startMode('normal')">📚 じゅんばんモード</button>
+        <button class="mode-btn" onclick="startMode('normal_first')">📚 じゅんばんモード（前半）</button>
+        <button class="mode-btn" onclick="startMode('normal_second')">📚 じゅんばんモード（後半）</button>
         <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
         <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (99%いか)</button>
         <button class="mode-btn" onclick="showWeakPoints()">📊 じゃくてんかくにん</button>
@@ -429,7 +434,13 @@
       let questions = [...allQuestions];
 
       // モード別フィルタリング
-      if (mode === 'oboeru') {
+      if (mode === 'normal_first') {
+        // 前半：rowが2〜21（スプシ2行目〜21行目）
+        questions = questions.filter(q => q.row >= 2 && q.row <= 21);
+      } else if (mode === 'normal_second') {
+        // 後半：rowが22〜41（スプシ22行目〜41行目）
+        questions = questions.filter(q => q.row >= 22 && q.row <= 41);
+      } else if (mode === 'oboeru') {
         // 正答率99%以下のものを全部選ぶ
         questions = questions.filter(q => {
           if (q.total === 0) return true; // 未回答は含める
@@ -442,15 +453,15 @@
         // ランダムモード
         questions = shuffleArray(questions);
       }
-      // normalモードは順番のまま
+      // それ以外は順番のまま
 
       if (questions.length === 0) {
         alert('もんだいがありません!すごい!ぜんぶおぼえたね!🎉');
         return;
       }
 
-      // 40問まで（じゅんばんモードとランダムモード）、おぼえるぞモードは全部
-      let maxQuestions = 40;
+      // おぼえるぞモードは全問、それ以外は最大20問
+      let maxQuestions = 20;
       if (mode === 'oboeru') {
         maxQuestions = questions.length; // すべて出題
       }

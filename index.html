@@ -501,7 +501,7 @@
       document.getElementById('card').classList.toggle('flipped');
     }
 
-    async function answerQuestion(isCorrect) {
+    function answerQuestion(isCorrect) {
       if (!isFlipped) {
         alert('カードをクリックしてこたえをかくにんしてね!');
         return;
@@ -511,11 +511,8 @@
         correctCount++;
       }
 
-      // スプレッドシートに記録
+      // ローカルデータを即座に更新（画面切り替えをブロックしない）
       const q = currentQuestions[currentIndex];
-      await updateGoogleSheet(q.row, isCorrect);
-
-      // ローカルデータも更新
       const questionIndex = allQuestions.findIndex(item => item.row === q.row);
       if (questionIndex !== -1) {
         if (isCorrect) {
@@ -524,17 +521,17 @@
         allQuestions[questionIndex].total++;
       }
 
+      // 次の問題へ即座に進む
       currentIndex++;
       showQuestion();
+
+      // スプレッドシートへの記録はバックグラウンドで非同期実行（画面を待たせない）
+      updateGoogleSheet(q.row, isCorrect);
     }
 
-    async function updateGoogleSheet(row, isCorrect) {
-      try {
-        const url = `${SCRIPT_URL}?action=update&row=${row}&correct=${isCorrect}`;
-        await fetch(url);
-      } catch (error) {
-        console.error('記録エラー:', error);
-      }
+    function updateGoogleSheet(row, isCorrect) {
+      const url = `${SCRIPT_URL}?action=update&row=${row}&correct=${isCorrect}`;
+      fetch(url).catch(error => console.error('記録エラー:', error));
     }
 
     function showResult() {

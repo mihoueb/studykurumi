@@ -121,37 +121,28 @@
       align-items: center;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
       position: relative;
       margin-bottom: 20px;
     }
 
-    .card.flipped .card-front {
-      transform: rotateY(180deg);
-      opacity: 0;
-    }
-
-    .card.flipped .card-back {
-      transform: rotateY(0deg);
-      opacity: 1;
-    }
-
     .card-front, .card-back {
-      position: absolute;
       width: 100%;
-      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 40px;
-      transition: all 0.6s;
-      backface-visibility: hidden;
     }
 
     .card-back {
-      transform: rotateY(-180deg);
-      opacity: 0;
+      display: none;
+    }
+
+    .card.flipped .card-front {
+      display: none;
+    }
+
+    .card.flipped .card-back {
+      display: flex;
     }
 
     .question-text {
@@ -435,35 +426,28 @@
 
       // モード別フィルタリング
       if (mode === 'normal_first') {
-        // 前半：rowが2〜21（スプシ2行目〜21行目）
         questions = questions.filter(q => q.row >= 2 && q.row <= 21);
       } else if (mode === 'normal_second') {
-        // 後半：rowが22〜41（スプシ22行目〜41行目）
         questions = questions.filter(q => q.row >= 22 && q.row <= 41);
       } else if (mode === 'oboeru') {
-        // 正答率99%以下のものを全部選ぶ
         questions = questions.filter(q => {
-          if (q.total === 0) return true; // 未回答は含める
+          if (q.total === 0) return true;
           const accuracy = (q.correct / q.total) * 100;
-          return accuracy <= 99; // 99%以下
+          return accuracy <= 99;
         });
-        // ランダムに出題
         questions = shuffleArray(questions);
       } else if (mode === 'random') {
-        // ランダムモード
         questions = shuffleArray(questions);
       }
-      // それ以外は順番のまま
 
       if (questions.length === 0) {
         alert('もんだいがありません!すごい!ぜんぶおぼえたね!🎉');
         return;
       }
 
-      // おぼえるぞモードは全問、それ以外は最大20問
       let maxQuestions = 20;
       if (mode === 'oboeru') {
-        maxQuestions = questions.length; // すべて出題
+        maxQuestions = questions.length;
       }
 
       currentQuestions = questions.slice(0, Math.min(maxQuestions, questions.length));
@@ -495,7 +479,6 @@
       document.getElementById('answer').innerText = q.answer;
       document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentQuestions.length}`;
       
-      // 正答率表示
       if (q.total > 0) {
         const accuracy = Math.round((q.correct / q.total) * 100);
         document.getElementById('accuracy').innerText = `せいとうりつ: ${accuracy}%`;
@@ -522,7 +505,6 @@
         correctCount++;
       }
 
-      // ローカルデータを即座に更新（画面切り替えをブロックしない）
       const q = currentQuestions[currentIndex];
       const questionIndex = allQuestions.findIndex(item => item.row === q.row);
       if (questionIndex !== -1) {
@@ -532,11 +514,9 @@
         allQuestions[questionIndex].total++;
       }
 
-      // 次の問題へ即座に進む
       currentIndex++;
       showQuestion();
 
-      // スプレッドシートへの記録はバックグラウンドで非同期実行（画面を待たせない）
       updateGoogleSheet(q.row, isCorrect);
     }
 
@@ -573,34 +553,29 @@
       document.getElementById('result').style.display = 'none';
       document.getElementById('weakPoints').style.display = 'none';
       document.getElementById('menu').style.display = 'block';
-      loadData(); // データを再読み込み
+      loadData();
     }
 
     function showWeakPoints() {
-      // 正答率順にソート
       let sortedQuestions = [...allQuestions].sort((a, b) => {
-        // 未回答は最後
         if (a.total === 0 && b.total === 0) return 0;
         if (a.total === 0) return 1;
         if (b.total === 0) return -1;
 
-        // 正答率が低い順
         const accuracyA = (a.correct / a.total) * 100;
         const accuracyB = (b.correct / b.total) * 100;
         return accuracyA - accuracyB;
       });
 
-      // 80%未満の問題のみを抽出
       let weakQuestions = sortedQuestions.filter(q => {
-        if (q.total === 0) return true; // 未回答は含める
+        if (q.total === 0) return true;
         const accuracy = (q.correct / q.total) * 100;
-        return accuracy < 80; // 80%未満のみ
+        return accuracy < 80;
       });
 
       if (weakQuestions.length === 0) {
         document.getElementById('weakPointsList').innerHTML = '<div style="text-align: center; font-size: 1.5em; color: #FF69B4; padding: 40px;">すべての問題が80%以上です!すごい!🎉</div>';
       } else {
-        // HTMLを生成
         let html = '';
         weakQuestions.forEach((q, index) => {
           let accuracyText = '';

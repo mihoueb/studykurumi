@@ -1,617 +1,739 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>くるみも!漢字カード</title>
-  <style>
-@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap');
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Flashcard - 単語帳</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Nunito:wght@600;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-font-family: 'Klee One', cursive;
-font-weight: 600;
-      background: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
+        :root {
+            --pink: #FF6B9D;
+            --pink-light: #FFB3CF;
+            --pink-deep: #E91E8C;
+            --purple: #C084FC;
+            --purple-deep: #9333EA;
+            --bg: #FFF0F7;
+            --white: #FFFFFF;
+            --ink: #2D1B4E;
+            --ink-light: #7C5C8A;
+            --green-deep: #16A34A;
+            --red-deep: #DC2626;
+            --shadow-card: 0 24px 64px rgba(45, 27, 78, 0.14);
+        }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+        html, body {
+            width: 100%; height: 100%; overflow: hidden;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+        }
 
-    h1 {
-      text-align: center;
-      background: linear-gradient(135deg, #FF69B4, #DA70D6, #FF69B4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 2.2em;
-      text-shadow: none;
-      margin-bottom: 30px;
-      animation: bounce 2s infinite;
-      filter: drop-shadow(3px 3px 0px rgba(255, 182, 217, 0.5));
-    }
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(255,107,157,0.14) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(192,132,252,0.14) 0%, transparent 45%);
+            color: var(--ink);
+            display: flex; flex-direction: column;
+        }
 
-    h1 .small-text {
-      font-size: 0.7em;
-    }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,107,157,0.12) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none; z-index: 0;
+        }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
+        .container {
+            position: relative; z-index: 1;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            padding: 14px;
+            max-width: 600px; margin: 0 auto;
+        }
 
-    .menu {
-      background: white;
-      border-radius: 25px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
-      margin-bottom: 20px;
-    }
+        /* ==================== MODE SELECTION ==================== */
+        #modeSelection {
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            flex: 1; gap: 20px;
+        }
 
-    .menu h2 {
-      color: #FF69B4;
-      font-size: 1.8em;
-      margin-bottom: 20px;
-      text-align: center;
-      display: none;
-    }
+        .mode-title h1 {
+            font-size: 2.8rem; font-weight: 900; text-align: center;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: float 4s ease-in-out infinite;
+        }
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        .mode-title .subtitle {
+            text-align: center; color: var(--ink-light);
+            font-size: 0.9rem; font-weight: 700; margin-top: 6px;
+        }
 
-    .mode-btn {
-      background: linear-gradient(135deg, #FF69B4, #DA70D6, #B19CD9);
-      color: white;
-      border: none;
-      padding: 20px;
-      border-radius: 15px;
-      font-size: 1.3em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(218, 112, 214, 0.4);
-    }
+        .mode-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 12px; width: 100%;
+        }
 
-    .mode-btn:nth-child(1) {
-      background: linear-gradient(135deg, #FF69B4, #FF1493, #DA70D6);
-    }
+        .mode-btn {
+            position: relative; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 20px 14px; border: none; border-radius: 22px;
+            font-family: inherit; cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-height: 108px; overflow: hidden;
+            animation: fadeUp 0.4s ease both;
+        }
+        .mode-btn:nth-child(1) { animation-delay: 0.05s; }
+        .mode-btn:nth-child(2) { animation-delay: 0.1s; }
+        .mode-btn:nth-child(3) { animation-delay: 0.15s; }
+        .mode-btn:nth-child(4) { animation-delay: 0.2s; }
+        .mode-btn:active { transform: scale(0.94); }
 
-    .mode-btn:nth-child(2) {
-      background: linear-gradient(135deg, #FF85C1, #FF69B4, #DA70D6);
-    }
+        .mode-btn-icon { font-size: 2.2rem; margin-bottom: 5px; }
+        .mode-btn-label { font-size: 1rem; font-weight: 900; color: white; }
+        .mode-btn-desc { font-size: 0.72rem; margin-top: 3px; color: rgba(255,255,255,0.82); font-weight: 700; }
 
-    .mode-btn:nth-child(3) {
-      background: linear-gradient(135deg, #DA70D6, #BA55D3, #9370DB);
-    }
+        .mode-normal      { background: linear-gradient(145deg, #FF6B9D, #E91E8C); box-shadow: 0 8px 24px rgba(255,107,157,0.4); }
+        .mode-random      { background: linear-gradient(145deg, #C084FC, #9333EA); box-shadow: 0 8px 24px rgba(147,51,234,0.35); }
+        .mode-mistakes    { background: linear-gradient(145deg, #FBBF24, #D97706); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
+        .mode-low-accuracy{ background: linear-gradient(145deg, #2DD4BF, #0891B2); box-shadow: 0 8px 24px rgba(8,145,178,0.35); }
 
-    .mode-btn:nth-child(4) {
-      background: linear-gradient(135deg, #FF69B4, #FF85C1, #FFB6D9);
-    }
+        /* ==================== HEADER ==================== */
+        .header {
+            display: none; align-items: center; justify-content: space-between;
+            margin-bottom: 10px; flex-shrink: 0;
+        }
+        .header.show { display: flex; }
 
-    .mode-btn:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(218, 112, 214, 0.6);
-    }
+        .header-title {
+            font-size: 1.3rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
 
-    .mode-btn:active {
-      transform: translateY(0);
-    }
+        .header-mode-badge {
+            font-size: 0.7rem; font-weight: 900; padding: 4px 12px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white; letter-spacing: 0.3px;
+        }
 
-    .card-container {
-      display: none;
-    }
+        /* ==================== STATS DASHBOARD ==================== */
+        .stats-container {
+            display: none; flex-shrink: 0; margin-bottom: 10px;
+        }
+        .stats-container.show { display: block; }
 
-    .card {
-      background: white;
-      border-radius: 25px;
-      padding: 60px 40px;
-      min-height: 400px;
-      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-      margin-bottom: 20px;
-    }
+        .stats-dashboard {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(255,107,157,0.1);
+            border: 1.5px solid rgba(255,107,157,0.12);
+            padding: 12px 16px;
+            display: flex; align-items: center; gap: 14px;
+        }
 
-    .card-front, .card-back {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-    }
+        /* Ring */
+        .stats-ring-wrap {
+            position: relative; flex-shrink: 0;
+            width: 68px; height: 68px;
+        }
+        .stats-ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255,107,157,0.12); stroke-width: 6; }
+        .ring-fill {
+            fill: none; stroke-width: 6;
+            stroke: url(#ringGrad);
+            stroke-linecap: round;
+            stroke-dasharray: 163;
+            stroke-dashoffset: 163;
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.34,1.2,0.64,1);
+        }
+        .ring-center {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .ring-pct {
+            font-size: 1.1rem; font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, var(--pink), var(--purple-deep));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .ring-label {
+            font-size: 0.52rem; font-weight: 700; color: var(--ink-light);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px;
+        }
 
-    .card-back {
-      display: none;
-    }
+        /* Bar rows */
+        .stats-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 
-    .card.flipped .card-front {
-      display: none;
-    }
+        .stats-row { display: flex; align-items: center; gap: 8px; }
 
-    .card.flipped .card-back {
-      display: flex;
-    }
+        .stats-row-label {
+            font-size: 0.68rem; font-weight: 900; color: var(--ink-light);
+            text-transform: uppercase; letter-spacing: 0.4px;
+            width: 38px; flex-shrink: 0;
+        }
 
-    .question-text {
-      font-size: 2.2em;
-      line-height: 2;
-      color: #333;
-font-family: 'Klee One', cursive;
-font-weight: 600;
-      letter-spacing: 0.1em;
-    }
+        .mini-bar-wrap {
+            flex: 1; height: 8px; background: rgba(255,107,157,0.1);
+            border-radius: 50px; overflow: hidden;
+        }
+        .mini-bar { height: 100%; border-radius: 50px; transition: width 0.5s cubic-bezier(0.34,1.2,0.64,1); }
+        .mini-bar-progress { background: linear-gradient(90deg, var(--pink), var(--purple)); width: 0%; }
+        .mini-bar-accuracy { background: linear-gradient(90deg, #4ADE80, #16A34A); width: 0%; }
 
-    .answer-text {
-      font-size: 4.5em;
-      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-font-family: 'Klee One', cursive;
-font-weight: 600;
-      letter-spacing: 0.15em;
-    }
+        .stats-row-val {
+            font-size: 0.8rem; font-weight: 900;
+            color: var(--ink); width: 40px; text-align: right; flex-shrink: 0;
+        }
 
-    .card-info {
-      margin-bottom: 15px;
-      text-align: center;
-      background: linear-gradient(135deg, #FF69B4, #DA70D6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 1.2em;
-      font-weight: bold;
-    }
+        /* ==================== ERROR / LOADING ==================== */
+        .error-message {
+            display: none; background: #FFF0F0; color: var(--red-deep);
+            padding: 10px 14px; border-radius: 12px; margin-bottom: 10px;
+            border-left: 4px solid var(--red-deep);
+            font-size: 0.83rem; font-weight: 700; flex-shrink: 0;
+        }
+        .error-message.show { display: block; }
 
-    .accuracy {
-      font-size: 0.9em;
-      color: #999;
-      margin-top: 5px;
-    }
+        .loading { display: none; justify-content: center; align-items: center; flex: 1; flex-direction: column; gap: 14px; }
+        .loading.show { display: flex; }
 
-    .button-container {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-    }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 4px solid rgba(255,107,157,0.15);
+            border-top-color: var(--pink);
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        .loading-text { font-size: 0.85rem; font-weight: 700; color: var(--ink-light); }
 
-    .answer-btn {
-      flex: 1;
-      max-width: 250px;
-      padding: 25px;
-      font-size: 1.5em;
-      font-weight: bold;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
+        /* ==================== MAIN CONTENT ==================== */
+        #mainContent { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        #mainContent.show { display: flex; }
 
-    .correct-btn {
-      background: linear-gradient(135deg, #FFB6D9, #FF69B4, #DA70D6);
-      color: white;
-    }
+        /* shrink non-card elements to give card max space */
+        .progress-section { margin-bottom: 7px !important; flex-shrink: 0; }
+        .button-group { margin-bottom: 7px !important; gap: 8px !important; }
+        .btn { padding: 12px 10px !important; font-size: 0.9rem !important; }
+        .btn-back { padding: 9px !important; font-size: 0.78rem !important; }
 
-    .wrong-btn {
-      background: linear-gradient(135deg, #D4A5F5, #B19CD9, #9370DB);
-      color: white;
-    }
+        /* ==================== CARD ==================== */
+        .card-container {
+            perspective: 1200px;
+            flex: 1; display: flex;
+            justify-content: center; align-items: center;
+            margin-bottom: 8px; min-height: 0;
+        }
 
-    .answer-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
+        .card {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.55s cubic-bezier(0.6,-0.3,0.3,1.4);
+            transform-style: preserve-3d;
+        }
+        .card.flipped { transform: rotateY(180deg); }
 
-    .answer-btn:active {
-      transform: translateY(0);
-    }
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            display: flex; flex-direction: column;
+            border-radius: 24px; cursor: pointer; overflow: hidden;
+        }
 
-    .result {
-      display: none;
-      background: white;
-      border-radius: 25px;
-      padding: 40px;
-      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
-      text-align: center;
-    }
+        /* FRONT */
+        .card-front {
+            background: linear-gradient(150deg, #FF85B4 0%, #D91A80 100%);
+            box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .card-front::before {
+            content: ''; position: absolute; top: -30%; right: -15%;
+            width: 65%; height: 65%;
+            background: rgba(255,255,255,0.12); border-radius: 50%; pointer-events: none;
+        }
+        .card-front::after {
+            content: ''; position: absolute; bottom: -20%; left: -10%;
+            width: 50%; height: 50%;
+            background: rgba(255,255,255,0.07); border-radius: 50%; pointer-events: none;
+        }
 
-    .result h2 {
-      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 2.5em;
-      margin-bottom: 30px;
-    }
+        /* BACK */
+        .card-back {
+            background: linear-gradient(150deg, #F5EEFF 0%, #EDE0FF 100%);
+            box-shadow: var(--shadow-card);
+            transform: rotateY(180deg);
+        }
+        .card-back::before {
+            content: ''; position: absolute; bottom: -25%; right: -10%;
+            width: 55%; height: 55%;
+            background: rgba(192,132,252,0.15); border-radius: 50%; pointer-events: none;
+        }
 
-    .result-stats {
-      font-size: 1.5em;
-      color: #333;
-      margin-bottom: 30px;
-    }
+        /* Card inner layout */
+        .card-inner {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column;
+            height: 100%; padding: 12px 18px 10px;
+        }
 
-    .back-btn {
-      background: linear-gradient(135deg, #FF69B4, #DA70D6, #9370DB);
-      color: white;
-      border: none;
-      padding: 20px 40px;
-      border-radius: 15px;
-      font-size: 1.3em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(218, 112, 214, 0.4);
-    }
+        .card-top-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; margin-bottom: 4px;
+        }
 
-    .back-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(218, 112, 214, 0.6);
-    }
+        .card-badge {
+            font-size: 0.6rem; font-weight: 900;
+            padding: 3px 10px; border-radius: 50px;
+            letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .card-front .card-badge { background: rgba(255,255,255,0.22); color: rgba(255,255,255,0.95); }
+        .card-back .card-badge { background: rgba(147,51,234,0.12); color: var(--purple-deep); }
 
-    .loading {
-      text-align: center;
-      background: linear-gradient(135deg, #FF69B4, #DA70D6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 1.5em;
-      margin-top: 50px;
-    }
+        .card-num { font-size: 0.65rem; font-weight: 900; opacity: 0.6; }
+        .card-front .card-num { color: white; }
+        .card-back .card-num { color: var(--ink-light); }
 
-    .weak-points {
-      animation: fadeIn 0.3s ease-in;
-    }
+        /* Scrollable text area */
+        .card-body {
+            flex: 1; display: flex; flex-direction: column;
+            text-align: left; gap: 0;
+            padding: 4px 0 4px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        .card-back .card-body { scrollbar-color: rgba(147,51,234,0.25) transparent; }
+        .card-body::-webkit-scrollbar { width: 4px; }
+        .card-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        .card-back .card-body::-webkit-scrollbar-thumb { background: rgba(147,51,234,0.25); }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+        /* 問題1: 少し大きめ */
+        .card-q1 {
+            font-size: 1.0rem;
+            font-weight: 700; line-height: 1.7;
+            color: white;
+            word-break: break-word;
+        }
 
-    .weak-point-item {
-      background: linear-gradient(135deg, #FFE5F1, #FFF0F6);
-      border-left: 5px solid #FF69B4;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        /* 区切り線 */
+        .card-divider {
+            width: 100%; height: 1px;
+            background: rgba(255,255,255,0.2);
+            flex-shrink: 0; margin: 8px 0;
+        }
 
-    .weak-point-question {
-      font-size: 1.3em;
-      color: #333;
-      font-family: 'Klee One', cursive;
-font-weight: 600;
-      flex: 1;
-    }
+        /* 問題2: 少し小さめ */
+        .card-q2 {
+            font-size: 0.82rem;
+            font-weight: 400; line-height: 1.65;
+            color: rgba(255,255,255,0.78);
+            word-break: break-word;
+        }
 
-    .weak-point-answer {
-      font-size: 1.8em;
-      color: #FF69B4;
-font-family: 'Klee One', cursive;
-font-weight: 600;
-      margin-left: 20px;
-      min-width: 60px;
-      text-align: center;
-    }
+        /* Answer */
+        .card-answer-text {
+            font-size: 1.4rem;
+            font-weight: 900; line-height: 1.35;
+            color: var(--purple-deep);
+            word-break: break-word;
+            letter-spacing: -0.2px;
+            text-align: center;
+            margin: auto 0;
+        }
 
-    .weak-point-accuracy {
-      font-size: 1.1em;
-      color: #DA70D6;
-      font-weight: bold;
-      margin-left: 20px;
-      min-width: 80px;
-      text-align: right;
-    }
+        /* Tap hint */
+        .card-tap-hint {
+            text-align: center; font-size: 0.6rem; font-weight: 700;
+            letter-spacing: 0.5px; padding-bottom: 1px;
+            flex-shrink: 0; margin-top: 4px;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        .card-front .card-tap-hint { color: rgba(255,255,255,0.45); }
+        .card-back .card-tap-hint { color: rgba(100,60,150,0.4); }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.8em;
-      }
-      .question-text {
-        font-size: 2em;
-        line-height: 1.9;
-      }
-      .answer-text {
-        font-size: 3.8em;
-      }
-      .button-container {
-        flex-direction: column;
-      }
-      .answer-btn {
-        max-width: 100%;
-      }
-    }
-  </style>
+        /* ==================== PROGRESS ==================== */
+        .progress-section { margin-bottom: 10px; flex-shrink: 0; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .progress-label { font-size: 0.7rem; font-weight: 900; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.8px; }
+        .progress-count { font-size: 0.78rem; font-weight: 900; color: var(--pink); }
+        .progress-bar { width: 100%; height: 7px; background: rgba(255,107,157,0.12); border-radius: 50px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--pink), var(--purple));
+            border-radius: 50px; width: 0%;
+            transition: width 0.5s cubic-bezier(0.34,1.4,0.64,1);
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .button-group { display: flex; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
+
+        .btn {
+            flex: 1; padding: 15px 16px; border: none; border-radius: 16px;
+            font-family: inherit; font-size: 0.95rem; font-weight: 900;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn:active { transform: scale(0.94); }
+        .btn-success { background: linear-gradient(135deg, #4ADE80, #16A34A); color: white; box-shadow: 0 6px 20px rgba(22,163,74,0.32); }
+        .btn-danger  { background: linear-gradient(135deg, #FB7185, #DC2626); color: white; box-shadow: 0 6px 20px rgba(220,38,38,0.32); }
+
+        .btn-back {
+            width: 100%; padding: 11px; flex-shrink: 0;
+            background: rgba(255,107,157,0.07); color: var(--pink-deep);
+            border: 2px solid rgba(255,107,157,0.18); border-radius: 14px;
+            font-family: inherit; font-size: 0.82rem; font-weight: 900;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-back:hover { background: rgba(255,107,157,0.14); }
+        .btn-back:active { transform: scale(0.97); }
+
+        /* ==================== COMPLETION ==================== */
+        #completionMessage { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; }
+        #completionMessage.show { display: flex; }
+
+        .completion-card {
+            background: var(--white); border-radius: 28px;
+            padding: 32px 24px; box-shadow: var(--shadow-card);
+            width: 100%; max-width: 380px; text-align: center;
+        }
+        .completion-emoji { font-size: 3.5rem; margin-bottom: 10px; display: block; }
+        .completion-card h2 {
+            font-size: 1.9rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--pink), var(--purple-deep));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 18px;
+        }
+        .completion-stats { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .completion-stat { flex: 1; background: var(--bg); border-radius: 14px; padding: 14px 8px; }
+        .completion-stat .clabel { font-size: 0.65rem; font-weight: 900; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        .completion-stat .cvalue {
+            font-size: 1.6rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--pink), var(--purple-deep));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        /* ==================== KEYFRAMES ==================== */
+        @keyframes spin    { to { transform: rotate(360deg); } }
+        @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes pulse   { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes fadeUp  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🦄 <span class="small-text">くるみも!</span>漢字カード 💖</h1>
+<div class="container">
 
-    <div id="menu" class="menu">
-      <div class="button-group">
-        <button class="mode-btn" onclick="startMode('normal_first')">📚 じゅんばんモード（前半）</button>
-        <button class="mode-btn" onclick="startMode('normal_second')">📚 じゅんばんモード（後半）</button>
-        <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
-        <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (99%いか)</button>
-        <button class="mode-btn" onclick="showWeakPoints()">📊 じゃくてんかくにん</button>
-      </div>
-    </div>
-
-    <div id="cardContainer" class="card-container">
-      <div class="card-info">
-        <span id="progress">1 / 40</span>
-        <div class="accuracy" id="accuracy">せいとうりつ: --%</div>
-      </div>
-      <div class="card" id="card" onclick="flipCard()">
-        <div class="card-front">
-          <div class="question-text" id="question"></div>
+    <!-- MODE SELECTION -->
+    <div id="modeSelection">
+        <div class="mode-title">
+            <h1>✨ 単語帳</h1>
+            <p class="subtitle">学習モードを選択してください</p>
         </div>
-        <div class="card-back">
-          <div class="answer-text" id="answer"></div>
+        <div class="mode-grid">
+            <button class="mode-btn mode-normal" data-mode="normal">
+                <div class="mode-btn-icon">📚</div>
+                <div class="mode-btn-label">通常</div>
+                <div class="mode-btn-desc">順番に学習</div>
+            </button>
+            <button class="mode-btn mode-random" data-mode="random">
+                <div class="mode-btn-icon">🎲</div>
+                <div class="mode-btn-label">ランダム</div>
+                <div class="mode-btn-desc">シャッフル</div>
+            </button>
+            <button class="mode-btn mode-mistakes" data-mode="mistakes">
+                <div class="mode-btn-icon">❌</div>
+                <div class="mode-btn-label">間違い</div>
+                <div class="mode-btn-desc">間違えた問題</div>
+            </button>
+            <button class="mode-btn mode-low-accuracy" data-mode="lowAccuracy">
+                <div class="mode-btn-icon">📊</div>
+                <div class="mode-btn-label">苦手</div>
+                <div class="mode-btn-desc">正答率が低い</div>
+            </button>
         </div>
-      </div>
-      <div class="button-container">
-        <button class="answer-btn correct-btn" onclick="answerQuestion(true)">✨ かけた!</button>
-        <button class="answer-btn wrong-btn" onclick="answerQuestion(false)">💦 かけなかった</button>
-      </div>
     </div>
 
-    <div id="result" class="result">
-      <h2>🎉 おつかれさま! 🎉</h2>
-      <div class="result-stats" id="resultStats"></div>
-      <button class="back-btn" onclick="backToMenu()">メニューにもどる</button>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title">✨ 単語帳</div>
+        <div class="header-mode-badge" id="headerMode">通常モード</div>
     </div>
 
-    <div id="weakPoints" class="weak-points" style="display: none;">
-      <button class="back-btn" style="margin-bottom: 20px;" onclick="backToMenu()">メニューにもどる</button>
-      <h2 style="color: #FF69B4; text-align: center; margin-bottom: 30px;">📊 じゃくてんかくにん</h2>
-      <div id="weakPointsList" style="background: white; border-radius: 25px; padding: 30px; box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);"></div>
+    <!-- STATS DASHBOARD -->
+    <div class="stats-container">
+        <div class="stats-dashboard">
+            <div class="stats-ring-wrap">
+                <svg viewBox="0 0 60 60">
+                    <defs>
+                        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#FF6B9D"/>
+                            <stop offset="100%" stop-color="#9333EA"/>
+                        </linearGradient>
+                    </defs>
+                    <circle class="ring-bg" cx="30" cy="30" r="26"/>
+                    <circle class="ring-fill" id="ringFill" cx="30" cy="30" r="26"/>
+                </svg>
+                <div class="ring-center">
+                    <div class="ring-pct" id="ringPct">-</div>
+                    <div class="ring-label">正答率</div>
+                </div>
+            </div>
+            <div class="stats-info">
+                <div class="stats-row">
+                    <div class="stats-row-label">進捗</div>
+                    <div class="mini-bar-wrap"><div class="mini-bar mini-bar-progress" id="miniBarProgress"></div></div>
+                    <div class="stats-row-val" id="progressVal">0/0</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-row-label">正答率</div>
+                    <div class="mini-bar-wrap"><div class="mini-bar mini-bar-accuracy" id="miniBarAccuracy"></div></div>
+                    <div class="stats-row-val" id="accuracyVal">-</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="loading" class="loading" style="display: none;">
-      よみこみちゅう... 💖
+    <!-- ERROR -->
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- LOADING -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">データを読み込み中...</div>
     </div>
-  </div>
 
-  <script>
-    // Google Apps Script のウェブアプリURL
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIpsYG55zXaoBFQIMUrQpk78YZkbFIYnw5qFdEqdlzHES2iJtcYS2jxGC3rRmmBQRlkQ/exec';
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+        <div class="card-container">
+            <div class="card" id="card">
+                <!-- FRONT -->
+                <div class="card-face card-front">
+                    <div class="card-inner">
+                        <div class="card-top-bar">
+                            <div class="card-badge">問 題</div>
+                            <div class="card-num" id="cardNum">1/1</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-q1" id="cardQ1">-</div>
+                            <div class="card-divider" id="cardDivider"></div>
+                            <div class="card-q2" id="cardQ2"></div>
+                        </div>
+                        <div class="card-tap-hint">👆 タップして答えを見る</div>
+                    </div>
+                </div>
+                <!-- BACK -->
+                <div class="card-face card-back">
+                    <div class="card-inner">
+                        <div class="card-top-bar">
+                            <div class="card-badge">答 え</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-answer-text" id="cardAnswer">-</div>
+                        </div>
+                        <div class="card-tap-hint">👆 タップして問題に戻る</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    let allQuestions = [];
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let correctCount = 0;
-    let isFlipped = false;
-    let currentMode = '';
+        <div class="progress-section">
+            <div class="progress-header">
+                <span class="progress-label">学習進捗</span>
+                <span class="progress-count" id="progressText">0/0</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
 
-    // 初期読み込み
-    window.addEventListener('load', () => {
-      loadData();
+        <div class="button-group">
+            <button class="btn btn-success" id="correctBtn">⭐ かんぺき！</button>
+            <button class="btn btn-danger" id="incorrectBtn">🌱 もうすこし！</button>
+        </div>
+
+        <button class="btn-back" id="resetBtn">← モード選択に戻る</button>
+    </div>
+
+    <!-- COMPLETION -->
+    <div id="completionMessage">
+        <div class="completion-card">
+            <span class="completion-emoji">🎉</span>
+            <h2>完了！</h2>
+            <div class="completion-stats">
+                <div class="completion-stat">
+                    <div class="clabel">正答数</div>
+                    <div class="cvalue" id="finalCorrect">-</div>
+                </div>
+                <div class="completion-stat">
+                    <div class="clabel">正答率</div>
+                    <div class="cvalue" id="finalAccuracy">-</div>
+                </div>
+            </div>
+            <button class="btn-back" id="restartBtn">← モード選択に戻る</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzV35B-Nh4H6ukPGp28xsDoVWLRK0dHOr8EtPfd1dCUqEbccrKnrIfFnkLibvFMcBgP/exec';
+    let allCards = [], displayCards = [], currentIndex = 0, isFlipped = false, currentMode = 'normal';
+
+    const $ = id => document.getElementById(id);
+    const modeSelection = $('modeSelection');
+    const header = document.querySelector('.header');
+    const statsContainer = document.querySelector('.stats-container');
+    const mainContent = $('mainContent');
+    const loading = $('loading');
+    const errorMessage = $('errorMessage');
+    const completionMessage = $('completionMessage');
+    const card = $('card');
+
+    async function fetchData() {
+        const r = await fetch(`${APP_SCRIPT_URL}?action=getData`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            currentMode = btn.dataset.mode;
+            modeSelection.style.display = 'none';
+            loading.classList.add('show');
+            errorMessage.classList.remove('show');
+            try {
+                allCards = await fetchData();
+                if (!allCards?.length) throw new Error('データが見つかりません');
+                setupCards();
+                loading.classList.remove('show');
+                header.classList.add('show');
+                statsContainer.classList.add('show');
+                mainContent.classList.add('show');
+                currentIndex = 0;
+                displayCard();
+            } catch(e) {
+                loading.classList.remove('show');
+                showError('データの読み込みに失敗しました: ' + e.message);
+                modeSelection.style.display = 'flex';
+            }
+        });
     });
 
-    // データ読み込み
-    async function loadData() {
-      document.getElementById('loading').style.display = 'block';
-      try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
-        allQuestions = data;
-        document.getElementById('loading').style.display = 'none';
-      } catch (error) {
-        console.error('データ読み込みエラー:', error);
-        alert('データの読み込みに失敗しました。もう一度試してください。');
-        document.getElementById('loading').style.display = 'none';
-      }
-    }
-
-    function startMode(mode) {
-      currentMode = mode;
-      let questions = [...allQuestions];
-
-      // モード別フィルタリング
-      if (mode === 'normal_first') {
-        questions = questions.filter(q => q.row >= 2 && q.row <= 21);
-      } else if (mode === 'normal_second') {
-        questions = questions.filter(q => q.row >= 22 && q.row <= 41);
-      } else if (mode === 'oboeru') {
-        questions = questions.filter(q => {
-          if (q.total === 0) return true;
-          const accuracy = (q.correct / q.total) * 100;
-          return accuracy <= 99;
-        });
-        questions = shuffleArray(questions);
-      } else if (mode === 'random') {
-        questions = shuffleArray(questions);
-      }
-
-      if (questions.length === 0) {
-        alert('もんだいがありません!すごい!ぜんぶおぼえたね!🎉');
-        return;
-      }
-
-      let maxQuestions = 20;
-      if (mode === 'oboeru') {
-        maxQuestions = questions.length;
-      }
-
-      currentQuestions = questions.slice(0, Math.min(maxQuestions, questions.length));
-      currentIndex = 0;
-      correctCount = 0;
-
-      document.getElementById('menu').style.display = 'none';
-      document.getElementById('cardContainer').style.display = 'block';
-      showQuestion();
-    }
-
-    function shuffleArray(array) {
-      const newArray = [...array];
-      for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-      }
-      return newArray;
-    }
-
-    function showQuestion() {
-      if (currentIndex >= currentQuestions.length) {
-        showResult();
-        return;
-      }
-
-      const q = currentQuestions[currentIndex];
-      document.getElementById('question').innerText = q.question;
-      document.getElementById('answer').innerText = q.answer;
-      document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentQuestions.length}`;
-      
-      if (q.total > 0) {
-        const accuracy = Math.round((q.correct / q.total) * 100);
-        document.getElementById('accuracy').innerText = `せいとうりつ: ${accuracy}%`;
-      } else {
-        document.getElementById('accuracy').innerText = 'せいとうりつ: --% (はじめて)';
-      }
-
-      isFlipped = false;
-      document.getElementById('card').classList.remove('flipped');
-    }
-
-    function flipCard() {
-      isFlipped = !isFlipped;
-      document.getElementById('card').classList.toggle('flipped');
-    }
-
-    function answerQuestion(isCorrect) {
-      if (!isFlipped) {
-        alert('カードをクリックしてこたえをかくにんしてね!');
-        return;
-      }
-
-      if (isCorrect) {
-        correctCount++;
-      }
-
-      const q = currentQuestions[currentIndex];
-      const questionIndex = allQuestions.findIndex(item => item.row === q.row);
-      if (questionIndex !== -1) {
-        if (isCorrect) {
-          allQuestions[questionIndex].correct++;
+    function setupCards() {
+        displayCards = JSON.parse(JSON.stringify(allCards));
+        const names = { normal:'📚 通常モード', random:'🎲 ランダム', mistakes:'❌ 間違い問題', lowAccuracy:'📊 苦手問題' };
+        $('headerMode').textContent = names[currentMode];
+        switch(currentMode) {
+            case 'random': displayCards = shuffle(displayCards); break;
+            case 'mistakes':
+                displayCards = shuffle(displayCards.filter(c => c.total > 0 && c.correct < c.total));
+                if (!displayCards.length) { showError('間違えた問題がありません。'); return; }
+                break;
+            case 'lowAccuracy':
+                displayCards = displayCards.filter(c => c.total > 0).sort((a,b) => a.correct/a.total - b.correct/b.total);
+                if (!displayCards.length) { showError('対象の問題がありません。'); return; }
+                break;
         }
-        allQuestions[questionIndex].total++;
-      }
-
-      currentIndex++;
-      showQuestion();
-
-      updateGoogleSheet(q.row, isCorrect);
     }
 
-    function updateGoogleSheet(row, isCorrect) {
-      const url = `${SCRIPT_URL}?action=update&row=${row}&correct=${isCorrect}`;
-      fetch(url).catch(error => console.error('記録エラー:', error));
+    function shuffle(arr) {
+        const a = [...arr];
+        for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+        return a;
     }
 
-    function showResult() {
-      document.getElementById('cardContainer').style.display = 'none';
-      document.getElementById('result').style.display = 'block';
-      
-      const percentage = Math.round((correctCount / currentQuestions.length) * 100);
-      let message = '';
-      
-      if (percentage >= 90) {
-        message = 'すごい!かんぺき! 🌟';
-      } else if (percentage >= 70) {
-        message = 'よくがんばったね! 💮';
-      } else if (percentage >= 50) {
-        message = 'もうすこし! 📝';
-      } else {
-        message = 'つぎはがんばろう! 💪';
-      }
-
-      document.getElementById('resultStats').innerHTML = `
-        <div style="font-size: 2em; margin-bottom: 20px;">${message}</div>
-        <div>かけた: ${correctCount} / ${currentQuestions.length}</div>
-        <div>せいとうりつ: ${percentage}%</div>
-      `;
+    function displayCard() {
+        if (currentIndex >= displayCards.length) { showCompletion(); return; }
+        const c = displayCards[currentIndex];
+        $('cardQ1').textContent = c.japanese || '-';
+        $('cardAnswer').textContent = c.answer || '-';
+        $('cardNum').textContent = `${currentIndex+1}/${displayCards.length}`;
+        const q2 = $('cardQ2');
+        const divider = $('cardDivider');
+        if (c.english) {
+            q2.textContent = c.english;
+            q2.style.display = '';
+            divider.style.display = '';
+        } else {
+            q2.style.display = 'none';
+            divider.style.display = 'none';
+        }
+        updateStats();
     }
 
-    function backToMenu() {
-      document.getElementById('result').style.display = 'none';
-      document.getElementById('weakPoints').style.display = 'none';
-      document.getElementById('menu').style.display = 'block';
-      loadData();
+    card.addEventListener('click', () => { isFlipped = !isFlipped; card.classList.toggle('flipped'); });
+    $('correctBtn').addEventListener('click', async () => { await updateCard(true); nextCard(); });
+    $('incorrectBtn').addEventListener('click', async () => { await updateCard(false); nextCard(); });
+
+    async function updateCard(correct) {
+        const c = displayCards[currentIndex];
+        try { await fetch(`${APP_SCRIPT_URL}?action=updateData&row=${c.row}&correct=${correct}`); } catch(e) {}
+        if (correct) c.correct++; c.total++;
+        const idx = allCards.findIndex(x => x.row === c.row);
+        if (idx !== -1) { if (correct) allCards[idx].correct++; allCards[idx].total++; }
     }
 
-    function showWeakPoints() {
-      let sortedQuestions = [...allQuestions].sort((a, b) => {
-        if (a.total === 0 && b.total === 0) return 0;
-        if (a.total === 0) return 1;
-        if (b.total === 0) return -1;
-
-        const accuracyA = (a.correct / a.total) * 100;
-        const accuracyB = (b.correct / b.total) * 100;
-        return accuracyA - accuracyB;
-      });
-
-      let weakQuestions = sortedQuestions.filter(q => {
-        if (q.total === 0) return true;
-        const accuracy = (q.correct / q.total) * 100;
-        return accuracy < 80;
-      });
-
-      if (weakQuestions.length === 0) {
-        document.getElementById('weakPointsList').innerHTML = '<div style="text-align: center; font-size: 1.5em; color: #FF69B4; padding: 40px;">すべての問題が80%以上です!すごい!🎉</div>';
-      } else {
-        let html = '';
-        weakQuestions.forEach((q, index) => {
-          let accuracyText = '';
-          let accuracyColor = '';
-
-          if (q.total === 0) {
-            accuracyText = '未回答';
-            accuracyColor = '#999';
-          } else {
-            const accuracy = Math.round((q.correct / q.total) * 100);
-            accuracyText = `${accuracy}%`;
-            if (accuracy >= 60) {
-              accuracyColor = '#FFC107';
-            } else {
-              accuracyColor = '#FF6B6B';
-            }
-          }
-
-          html += `
-            <div class="weak-point-item">
-              <div class="weak-point-question">${index + 1}. ${q.question}</div>
-              <div class="weak-point-answer">${q.answer}</div>
-              <div class="weak-point-accuracy" style="color: ${accuracyColor};">${accuracyText}</div>
-            </div>
-          `;
-        });
-
-        document.getElementById('weakPointsList').innerHTML = html;
-      }
-
-      document.getElementById('menu').style.display = 'none';
-      document.getElementById('weakPoints').style.display = 'block';
+    function nextCard() {
+        currentIndex++; isFlipped = false;
+        card.style.transition = 'none';
+        card.classList.remove('flipped');
+        card.offsetHeight; card.style.transition = '';
+        displayCard();
     }
-  </script>
+
+    function updateStats() {
+        let correct = 0, total = 0;
+        displayCards.forEach(c => { correct += c.correct; total += c.total; });
+        const pctNum = total > 0 ? Math.round((correct/total)*100) : 0;
+        const pctStr = total > 0 ? pctNum + '%' : '-';
+
+        // Ring
+        const CIRC = 2 * Math.PI * 26;
+        $('ringFill').style.strokeDashoffset = total > 0 ? CIRC * (1 - pctNum/100) : CIRC;
+        $('ringPct').textContent = pctStr;
+
+        // Bars
+        const progPct = (currentIndex / displayCards.length) * 100;
+        $('miniBarProgress').style.width = progPct + '%';
+        $('progressVal').textContent = `${currentIndex}/${displayCards.length}`;
+        $('miniBarAccuracy').style.width = (total > 0 ? pctNum : 0) + '%';
+        $('accuracyVal').textContent = pctStr;
+
+        // Progress strip
+        $('progressFill').style.width = progPct + '%';
+        $('progressText').textContent = `${currentIndex}/${displayCards.length}`;
+    }
+
+    function showError(msg) { errorMessage.textContent = msg; errorMessage.classList.add('show'); }
+
+    function showCompletion() {
+        mainContent.classList.remove('show');
+        header.classList.remove('show');
+        statsContainer.classList.remove('show');
+        completionMessage.classList.add('show');
+        let correct = 0, total = 0;
+        displayCards.forEach(c => { correct += c.correct; total += c.total; });
+        const pct = total > 0 ? Math.round((correct/total)*100) : 0;
+        $('finalCorrect').textContent = `${correct}/${total}`;
+        $('finalAccuracy').textContent = pct + '%';
+    }
+
+    function reset() {
+        currentIndex = 0; isFlipped = false;
+        card.style.transition = 'none';
+        card.classList.remove('flipped');
+        card.offsetHeight; card.style.transition = '';
+        modeSelection.style.display = 'flex';
+        header.classList.remove('show');
+        statsContainer.classList.remove('show');
+        mainContent.classList.remove('show');
+        completionMessage.classList.remove('show');
+        errorMessage.classList.remove('show');
+    }
+
+    $('resetBtn').addEventListener('click', reset);
+    $('restartBtn').addEventListener('click', reset);
+</script>
 </body>
 </html>

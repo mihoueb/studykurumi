@@ -416,6 +416,43 @@ h1 {
   .answer-text   { font-size: 3.2em; }
   .answer-btn    { font-size: 1.1em; padding: 16px; }
 }
+
+/* ===== 印刷（じゃくてんかくにん用） ===== */
+@media print {
+  @page { margin: 6mm; }
+  body {
+    background: #fff !important; padding: 0 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .container { max-width: none; margin: 0; }
+  /* タイトル・ボタン・見出しなど、印刷では消す */
+  h1, #weeklyBar, #statusBar, #menu, #cardContainer, #result, #loading,
+  #collection, #settings, .celebration, .coin-toast,
+  #weakPoints .back-btn, #weakPoints h2 { display: none !important; }
+  #weakPoints { display: block !important; }
+  /* リスト本体：枠・余白を最小化して2段組み */
+  #weakPointsList {
+    background: #fff !important; box-shadow: none !important;
+    border-radius: 0 !important; padding: 0 !important;
+    column-count: 2; column-gap: 8mm;
+  }
+  .weak-point-item {
+    background: #fff !important; border: none !important;
+    border-bottom: 1px solid #ddd !important; border-radius: 0 !important;
+    margin: 0 0 2px 0 !important; padding: 1px 4px !important;
+    break-inside: avoid;
+  }
+  /* 文字を大きく。答えだけ #FF9999、ほかは黒 */
+  .weak-point-question { font-size: 20px !important; color: #000 !important; }
+  .weak-point-answer {
+    font-size: 28px !important; color: #FF9999 !important;
+    min-width: 0 !important; margin-left: 8px !important;
+  }
+  .weak-point-accuracy {
+    font-size: 18px !important; color: #000 !important;
+    min-width: 0 !important; margin-left: 8px !important;
+  }
+}
 </style>
 </head>
 <body class="theme-pink">

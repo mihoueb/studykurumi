@@ -7,29 +7,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>くるみも!漢字カード</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Klee One', cursive;
-  font-weight: 600;
-  background: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 500;
+  background: var(--app-bg);
   min-height: 100dvh;
   padding: 16px;
+  transition: background 0.5s;
 }
+/* ===== THEMES ===== */
+body.theme-pink  { --app-bg: linear-gradient(135deg, #E6B0FF 0%, #FFB6D9 25%, #FFC9E3 50%, #D4A5F5 75%, #FFE5F1 100%); }
+body.theme-sky   { --app-bg: linear-gradient(135deg, #A0E9FF 0%, #BFF6FF 25%, #C9F0FF 50%, #A5D8F5 75%, #E5F6FF 100%); }
+body.theme-mint  { --app-bg: linear-gradient(135deg, #B6FFD9 0%, #C9FFE3 25%, #D4F5E0 50%, #A5F5C8 75%, #E5FFF1 100%); }
+body.theme-lemon { --app-bg: linear-gradient(135deg, #FFF3A0 0%, #FFE9B0 25%, #FFF0C9 50%, #FFD86B 75%, #FFF8E5 100%); }
+body.theme-night { --app-bg: linear-gradient(135deg, #5B4B8A 0%, #7B68EE 25%, #9370DB 50%, #6A5ACD 75%, #B19CD9 100%); }
 
 .container { max-width: 600px; margin: 0 auto; }
 
 h1 {
+  font-family: 'Mochiy Pop One', sans-serif;
   text-align: center;
   background: linear-gradient(135deg, #FF69B4, #DA70D6, #FF69B4);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  font-size: 2em; margin-bottom: 20px;
+  font-size: 2em; margin-bottom: 16px;
   animation: bounce 2s infinite;
   filter: drop-shadow(2px 2px 0px rgba(255,182,217,0.5));
 }
 @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  background: white; border-radius: 20px; padding: 14px 18px;
+  box-shadow: 0 6px 20px rgba(255,105,180,0.2); margin-bottom: 14px;
+}
+.status-top { display: flex; justify-content: space-between; align-items: center; }
+.status-greeting { font-size: 1.05em; color: #DA70D6; font-weight: bold; }
+.status-stats { display: flex; gap: 12px; align-items: center; }
+.status-stats .stat {
+  background: linear-gradient(135deg,#fff0f8,#f8e8ff);
+  border: 2px solid #FFB6D9; border-radius: 12px;
+  padding: 4px 10px; font-size: 1em; font-weight: bold; color: #FF69B4;
+}
+.level-progress {
+  margin-top: 10px; height: 12px; background: #f0e0f8;
+  border-radius: 8px; overflow: hidden;
+}
+.level-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg,#FF69B4,#DA70D6,#9370DB);
+  border-radius: 8px; transition: width 0.6s ease;
+}
+.level-caption { font-size: 0.75em; color: #b58fd0; text-align: right; margin-top: 4px; }
 
 /* ===== MENU ===== */
 .menu { background: white; border-radius: 25px; padding: 24px; box-shadow: 0 10px 30px rgba(255,105,180,0.3); }
@@ -38,12 +70,13 @@ h1 {
   color: white; border: none; padding: 18px; border-radius: 15px;
   font-size: 1.2em; font-weight: bold; cursor: pointer;
   transition: all 0.3s; box-shadow: 0 5px 15px rgba(218,112,214,0.4);
-  font-family: 'Klee One', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif;
 }
+.mode-btn.start-btn { font-size: 1.5em; padding: 24px; }
 .mode-btn:nth-child(1) { background: linear-gradient(135deg,#FF69B4,#FF1493,#DA70D6); }
 .mode-btn:nth-child(2) { background: linear-gradient(135deg,#FF85C1,#FF69B4,#DA70D6); }
 .mode-btn:nth-child(3) { background: linear-gradient(135deg,#DA70D6,#BA55D3,#9370DB); }
-.mode-btn:nth-child(4) { background: linear-gradient(135deg,#FF69B4,#FF85C1,#FFB6D9); }
+.mode-btn:nth-child(4) { background: linear-gradient(135deg,#FFB347,#FF85C1,#FFB6D9); }
 .mode-btn:nth-child(5) { background: linear-gradient(135deg,#B19CD9,#9370DB,#7B68EE); }
 .mode-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(218,112,214,0.6); }
 .mode-btn:active { transform: translateY(0); }
@@ -91,8 +124,9 @@ h1 {
 .card-back { display: none; }
 .card.flipped .card-front { display: none; }
 .card.flipped .card-back { display: flex; }
-.question-text { font-size: 1.9em; line-height: 2; color: #333; letter-spacing: 0.1em; }
+.question-text { font-family: 'Klee One', cursive; font-size: 1.9em; line-height: 2; color: #333; letter-spacing: 0.1em; }
 .answer-text {
+  font-family: 'Klee One', cursive;
   font-size: 4em;
   background: linear-gradient(135deg,#FF69B4,#DA70D6,#9370DB);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -105,12 +139,40 @@ h1 {
   flex: 1; max-width: 240px; padding: 20px;
   font-size: 1.3em; font-weight: bold; border: none; border-radius: 15px;
   cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  font-family: 'Klee One', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif;
 }
 .correct-btn { background: linear-gradient(135deg,#FFB6D9,#FF69B4,#DA70D6); color: white; }
 .wrong-btn   { background: linear-gradient(135deg,#D4A5F5,#B19CD9,#9370DB); color: white; }
 .answer-btn:hover  { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
 .answer-btn:active { transform: translateY(0); }
+
+/* ===== MASCOT ===== */
+.mascot-bubble {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 10px; font-size: 0.95em; color: #DA70D6;
+}
+.mascot-bubble .m-face { font-size: 1.6em; animation: bounce 2.5s infinite; }
+.mascot-bubble .m-say {
+  background: white; border: 2px solid #FFB6D9; border-radius: 14px;
+  padding: 6px 12px; box-shadow: 0 3px 10px rgba(255,105,180,0.2);
+}
+
+/* ===== COIN TOAST ===== */
+.coin-toast {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,#FFD700,#FFB347);
+  color: white; font-weight: bold; font-size: 1.2em;
+  padding: 8px 18px; border-radius: 20px; z-index: 120;
+  box-shadow: 0 5px 18px rgba(255,165,0,0.5);
+  opacity: 0; pointer-events: none;
+}
+.coin-toast.show { animation: coinToast 1.1s ease-out; }
+@keyframes coinToast {
+  0%{opacity:0; transform:translate(-50%,10px) scale(0.7);}
+  20%{opacity:1; transform:translate(-50%,0) scale(1.1);}
+  70%{opacity:1; transform:translate(-50%,0) scale(1);}
+  100%{opacity:0; transform:translate(-50%,-20px) scale(0.9);}
+}
 
 /* ===== CELEBRATIONS ===== */
 .celebration {
@@ -118,8 +180,8 @@ h1 {
   display: flex; align-items: center; justify-content: center;
 }
 .celebration-text {
-  font-family: 'Zen Maru Gothic', sans-serif;
-  font-size: 3em; font-weight: 700;
+  font-family: 'Mochiy Pop One', sans-serif;
+  font-size: 3em; font-weight: 400;
   background: linear-gradient(135deg,#FF69B4,#FFD700,#FF69B4);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: celebPop 0.8s ease-out forwards;
@@ -177,7 +239,12 @@ h1 {
 }
 .result-score-ring span { position: relative; z-index: 1; }
 .result-message { font-size: 1.5em; margin-bottom: 12px; }
-.result-stats { font-size: 1.1em; color: #666; margin-bottom: 20px; line-height: 1.8; }
+.result-stats { font-size: 1.1em; color: #666; margin-bottom: 12px; line-height: 1.8; }
+.result-reward {
+  background: linear-gradient(135deg,#FFF7D6,#FFE9B0);
+  border: 2px solid #FFD86B; border-radius: 14px;
+  padding: 10px; margin-bottom: 16px; font-weight: bold; color: #E69500;
+}
 .miss-list { text-align: left; margin: 16px 0; }
 .miss-item {
   background: linear-gradient(135deg,#fff0f8,#f8e8ff);
@@ -191,7 +258,7 @@ h1 {
   background: linear-gradient(135deg,#FF69B4,#DA70D6); color: white;
   border: none; border-radius: 12px; padding: 12px 20px;
   font-size: 1em; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%;
-  font-family: 'Klee One', cursive; transition: all 0.2s;
+  font-family: 'Zen Maru Gothic', sans-serif; transition: all 0.2s;
 }
 .retry-miss-btn:hover { transform: translateY(-2px); }
 
@@ -208,13 +275,93 @@ h1 {
 .weak-point-answer   { font-size: 1.5em; color: #FF69B4; margin-left: 14px; min-width: 50px; text-align: center; }
 .weak-point-accuracy { font-size: 1em; font-weight: bold; margin-left: 14px; min-width: 70px; text-align: right; }
 
+/* ===== COLLECTION ===== */
+.panel { display: none; animation: fadeIn 0.3s; }
+.panel h2 { color:#FF69B4; text-align:center; margin-bottom:20px; }
+.panel-card {
+  background: white; border-radius: 20px; padding: 20px;
+  box-shadow: 0 6px 20px rgba(255,105,180,0.2); margin-bottom: 16px;
+}
+.coll-coins {
+  text-align: center; font-size: 1.3em; font-weight: bold; color: #E69500;
+  margin-bottom: 14px;
+}
+.gacha-btn {
+  width: 100%; background: linear-gradient(135deg,#FFD700,#FFB347,#FF85C1);
+  color: white; border: none; border-radius: 16px; padding: 18px;
+  font-size: 1.3em; font-weight: bold; cursor: pointer;
+  font-family: 'Zen Maru Gothic', sans-serif; box-shadow: 0 5px 15px rgba(255,165,0,0.4);
+  transition: all 0.2s;
+}
+.gacha-btn:hover { transform: translateY(-3px) scale(1.02); }
+.gacha-btn:disabled { filter: grayscale(0.6); opacity: 0.6; cursor: not-allowed; transform: none; }
+.gacha-result { min-height: 0; text-align: center; }
+.gacha-result.show { min-height: 120px; margin-top: 14px; }
+.gacha-pop { font-size: 4em; animation: gachaPop 0.6s ease-out; }
+@keyframes gachaPop {
+  0%{transform:scale(0.2) rotate(-20deg); opacity:0;}
+  60%{transform:scale(1.3) rotate(8deg); opacity:1;}
+  100%{transform:scale(1) rotate(0);}
+}
+.gacha-name { font-size: 1.2em; color: #DA70D6; font-weight: bold; }
+.gacha-tag { font-size: 1em; color: #E69500; margin-top: 4px; }
+.coll-progress { text-align:center; color:#DA70D6; font-weight:bold; margin: 8px 0 14px; }
+.collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.sticker-cell {
+  aspect-ratio: 1; border-radius: 14px; display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+  border: 2px solid #f0e0f8; background: #faf5ff; transition: all 0.2s;
+}
+.sticker-cell.owned {
+  background: linear-gradient(135deg,#fff0f8,#f8e8ff); border-color: #FFB6D9;
+  box-shadow: 0 3px 10px rgba(255,105,180,0.18);
+}
+.sticker-cell .s-emoji { font-size: 2em; }
+.sticker-cell.locked .s-emoji { filter: grayscale(1); opacity: 0.35; }
+.sticker-cell .s-name { font-size: 0.6em; color: #b58fd0; margin-top: 2px; }
+
+/* ===== SETTINGS ===== */
+.settings-card label {
+  display: block; color: #DA70D6; font-weight: bold;
+  margin: 16px 0 8px; font-size: 1.05em;
+}
+.settings-card label:first-child { margin-top: 0; }
+.name-input {
+  width: 100%; padding: 12px 14px; border: 2px solid #FFB6D9;
+  border-radius: 12px; font-size: 1.1em; font-family: 'Klee One', cursive;
+  color: #555; outline: none;
+}
+.name-input:focus { border-color: #FF69B4; }
+.theme-swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.theme-swatch {
+  flex: 1; min-width: 56px; border-radius: 12px; padding: 8px 4px;
+  border: 3px solid transparent; cursor: pointer; text-align: center;
+  font-size: 0.75em; color: #fff; font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: all 0.2s;
+}
+.theme-swatch.active { border-color: #FF1493; transform: scale(1.05); }
+.mascot-pick { display: flex; gap: 10px; flex-wrap: wrap; }
+.mascot-opt {
+  width: 52px; height: 52px; border-radius: 14px; font-size: 1.8em;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid #f0e0f8; background: #faf5ff; cursor: pointer; transition: all 0.2s;
+}
+.mascot-opt.active { border-color: #FF69B4; background: #fff0f8; transform: scale(1.08); }
+.sound-toggle {
+  width: 100%; padding: 14px; border: none; border-radius: 14px;
+  font-size: 1.15em; font-weight: bold; cursor: pointer;
+  font-family: 'Zen Maru Gothic', sans-serif; color: white; transition: all 0.2s;
+}
+.sound-toggle.on  { background: linear-gradient(135deg,#FF69B4,#DA70D6); }
+.sound-toggle.off { background: linear-gradient(135deg,#c0c0c0,#a0a0a0); }
+
 /* ===== BUTTONS ===== */
 .back-btn {
   background: linear-gradient(135deg,#FF69B4,#DA70D6,#9370DB);
   color: white; border: none; padding: 16px 36px; border-radius: 15px;
   font-size: 1.2em; font-weight: bold; cursor: pointer;
   transition: all 0.3s; box-shadow: 0 5px 15px rgba(218,112,214,0.4);
-  font-family: 'Klee One', cursive; width: 100%;
+  font-family: 'Zen Maru Gothic', sans-serif; width: 100%;
 }
 .back-btn:hover { transform: translateY(-2px); }
 
@@ -239,9 +386,22 @@ h1 {
 }
 </style>
 </head>
-<body>
+<body class="theme-pink">
 <div class="container">
   <h1>🦄 <span style="font-size:0.7em">くるみも!</span>漢字カード 💖</h1>
+
+  <!-- ステータスバー -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-top">
+      <div class="status-greeting" id="statusGreeting">こんにちは！</div>
+      <div class="status-stats">
+        <span class="stat">🪙 <span id="coinCount">0</span></span>
+        <span class="stat">Lv.<span id="levelNum">1</span></span>
+      </div>
+    </div>
+    <div class="level-progress"><div class="level-progress-fill" id="levelFill"></div></div>
+    <div class="level-caption" id="levelCaption">つぎのレベルまで あと20もん</div>
+  </div>
 
   <!-- 週間グラフ -->
   <div class="weekly-bar" id="weeklyBar">
@@ -252,11 +412,11 @@ h1 {
   <!-- メニュー -->
   <div id="menu" class="menu">
     <div class="button-group">
-      <button class="mode-btn" onclick="startMode('normal_first')">📚 じゅんばんモード（前半）</button>
-      <button class="mode-btn" onclick="startMode('normal_second')">📚 じゅんばんモード（後半）</button>
-      <button class="mode-btn" onclick="startMode('random')">🎲 ランダムモード</button>
+      <button class="mode-btn start-btn" onclick="startMode('random')">✨ はじめる！</button>
       <button class="mode-btn" onclick="startMode('oboeru')">🔥 おぼえるぞモード (99%いか)</button>
       <button class="mode-btn" onclick="showWeakPoints()">📊 じゃくてんかくにん</button>
+      <button class="mode-btn" onclick="showCollection()">🎁 コレクション</button>
+      <button class="mode-btn" onclick="showSettings()">⚙️ せってい</button>
     </div>
   </div>
 
@@ -265,6 +425,10 @@ h1 {
     <div class="card-info">
       <span id="progress">1 / 20</span>
       <div class="accuracy" id="accuracy">せいとうりつ: --%</div>
+    </div>
+    <div class="mascot-bubble" id="mascotBubble">
+      <span class="m-face" id="mascotFace">🦄</span>
+      <span class="m-say" id="mascotSay">がんばってね！</span>
     </div>
     <div class="streak-badge" id="streakBadge"></div>
     <div class="retry-banner" id="retryBanner">
@@ -296,6 +460,7 @@ h1 {
     </div>
     <div class="result-message" id="resultMessage"></div>
     <div class="result-stats" id="resultStats"></div>
+    <div class="result-reward" id="resultReward" style="display:none"></div>
     <div class="miss-list" id="missList"></div>
     <button class="retry-miss-btn" id="retryMissBtn" style="display:none" onclick="retryMissed()">
       💪 まちがえた漢字だけもう一度！
@@ -310,8 +475,43 @@ h1 {
     <div id="weakPointsList" style="background:white;border-radius:20px;padding:20px;box-shadow:0 6px 20px rgba(255,105,180,0.2)"></div>
   </div>
 
+  <!-- コレクション -->
+  <div id="collection" class="panel">
+    <button class="back-btn" style="margin-bottom:16px" onclick="backToMenu()">🏠 メニューにもどる</button>
+    <h2>🎁 コレクション</h2>
+    <div class="panel-card">
+      <div class="coll-coins">🪙 <span id="collCoins">0</span> コイン</div>
+      <button class="gacha-btn" id="gachaBtn" onclick="drawGacha()">🎰 ガチャをひく！(10コイン)</button>
+      <div class="gacha-result" id="gachaResult"></div>
+    </div>
+    <div class="panel-card">
+      <div class="coll-progress" id="collProgress">あつめた数：0 / 0</div>
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+  </div>
+
+  <!-- せってい -->
+  <div id="settings" class="panel">
+    <button class="back-btn" style="margin-bottom:16px" onclick="backToMenu()">🏠 メニューにもどる</button>
+    <h2>⚙️ せってい</h2>
+    <div class="panel-card settings-card">
+      <label>🌸 なまえ</label>
+      <input class="name-input" id="nameInput" type="text" maxlength="8" placeholder="なまえをいれてね"
+             oninput="onNameInput(this.value)">
+      <label>🎨 はいけいのいろ</label>
+      <div class="theme-swatches" id="themeSwatches"></div>
+      <label>🦄 マスコット</label>
+      <div class="mascot-pick" id="mascotPick"></div>
+      <label>🔊 サウンド</label>
+      <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">サウンド：ON</button>
+    </div>
+  </div>
+
   <div id="loading" class="loading" style="display:none">よみこみちゅう... 💖</div>
 </div>
+
+<!-- コイン獲得トースト -->
+<div class="coin-toast" id="coinToast"></div>
 
 <!-- お祝いレイヤー -->
 <div class="celebration" id="celebration" style="display:none">
@@ -321,6 +521,28 @@ h1 {
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIpsYG55zXaoBFQIMUrQpk78YZkbFIYnw5qFdEqdlzHES2iJtcYS2jxGC3rRmmBQRlkQ/exec';
 const WEEK_KEY = 'kurumi_week_scores';
+const PROFILE_KEY = 'kurumi_profile';
+const LEVEL_STEP = 20;     // 何問正解でレベルアップするか
+const GACHA_COST = 10;     // ガチャ1回のコイン
+const DUP_REFUND = 3;      // ダブったときの返金コイン
+
+// ===== ステッカー図鑑 =====
+const STICKERS = [
+  {e:'🦄',n:'ユニコーン'},{e:'🐰',n:'うさぎ'},{e:'🐱',n:'ねこ'},{e:'🐶',n:'いぬ'},
+  {e:'🐻',n:'くま'},{e:'🐼',n:'パンダ'},{e:'🦊',n:'きつね'},{e:'🐧',n:'ペンギン'},
+  {e:'🌸',n:'さくら'},{e:'🌈',n:'にじ'},{e:'⭐',n:'スター'},{e:'🍓',n:'いちご'},
+  {e:'🧁',n:'カップケーキ'},{e:'🎀',n:'リボン'},{e:'👑',n:'おうかん'},{e:'💎',n:'ダイヤ'},
+  {e:'🦋',n:'ちょうちょ'},{e:'🌺',n:'はな'},{e:'🍭',n:'キャンディ'},{e:'🐬',n:'イルカ'}
+];
+
+// ===== テーマ =====
+const THEMES = [
+  {id:'pink',  n:'ピンク',   sw:'linear-gradient(135deg,#FFB6D9,#D4A5F5)'},
+  {id:'sky',   n:'みずいろ', sw:'linear-gradient(135deg,#A0E9FF,#A5D8F5)'},
+  {id:'mint',  n:'みどり',   sw:'linear-gradient(135deg,#B6FFD9,#A5F5C8)'},
+  {id:'lemon', n:'きいろ',   sw:'linear-gradient(135deg,#FFE9B0,#FFD86B)'},
+  {id:'night', n:'よぞら',   sw:'linear-gradient(135deg,#7B68EE,#5B4B8A)'}
+];
 
 let allQuestions = [];
 let currentQuestions = [];
@@ -331,6 +553,77 @@ let currentMode = '';
 let streak = 0;
 let missedInSession = [];
 let isRetryMode = false;
+let coinsThisSession = 0;
+
+// ===== プロフィール（コイン・レベル・コレクション・設定） =====
+function defaultProfile() {
+  return { name:'', coins:0, totalCorrect:0, owned:[], theme:'pink', sound:true, mascot:'🦄' };
+}
+let profile = loadProfile();
+function loadProfile() {
+  try { return Object.assign(defaultProfile(), JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}')); }
+  catch(e) { return defaultProfile(); }
+}
+function saveProfile() { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
+function getLevel() { return Math.floor(profile.totalCorrect / LEVEL_STEP) + 1; }
+
+function addCoins(n) {
+  profile.coins += n;
+  saveProfile();
+}
+function showCoinToast(n) {
+  const t = document.getElementById('coinToast');
+  t.textContent = `🪙 +${n}`;
+  t.classList.remove('show');
+  void t.offsetWidth; // reflow でアニメ再生
+  t.classList.add('show');
+}
+
+// ===== ステータスバー表示 =====
+function greetingText() {
+  const h = new Date().getHours();
+  const g = h < 11 ? 'おはよう' : (h < 17 ? 'こんにちは' : 'こんばんは');
+  return profile.name ? `${profile.mascot} ${g}、${profile.name}ちゃん！` : `${profile.mascot} ${g}！`;
+}
+function updateStatus() {
+  document.getElementById('statusGreeting').textContent = greetingText();
+  document.getElementById('coinCount').textContent = profile.coins;
+  document.getElementById('levelNum').textContent = getLevel();
+  const into = profile.totalCorrect % LEVEL_STEP;
+  document.getElementById('levelFill').style.width = (into / LEVEL_STEP * 100) + '%';
+  document.getElementById('levelCaption').textContent = `つぎのレベルまで あと${LEVEL_STEP - into}もん`;
+}
+function applyTheme() {
+  document.body.className = 'theme-' + profile.theme;
+}
+
+// ===== サウンド（Web Audio） =====
+let audioCtx = null;
+function playSound(type) {
+  if (!profile.sound) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const notes = {
+      correct: [660, 880],
+      wrong:   [330, 247],
+      coin:    [1175],
+      levelup: [660, 880, 1320],
+      gacha:   [523, 784, 1046]
+    }[type] || [600];
+    let t = audioCtx.currentTime;
+    notes.forEach(f => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      o.start(t); o.stop(t + 0.2);
+      t += 0.12;
+    });
+  } catch(e) {}
+}
 
 // ===== 週間記録 =====
 function getTodayKey() {
@@ -355,8 +648,7 @@ function renderWeeklyBar() {
   const dayNames = ['日','月','火','水','木','金','土'];
   const container = document.getElementById('weekDays');
   container.innerHTML = '';
-  // 今週の日曜日を基点にする
-  const todayDow = today.getDay(); // 0=日, 6=土
+  const todayDow = today.getDay();
   const sunday = new Date(today);
   sunday.setDate(today.getDate() - todayDow);
   for (let i = 0; i <= 6; i++) {
@@ -386,6 +678,8 @@ function renderWeeklyBar() {
 
 // ===== データ読み込み =====
 window.addEventListener('load', () => {
+  applyTheme();
+  updateStatus();
   renderWeeklyBar();
   loadData();
 });
@@ -407,12 +701,11 @@ function startMode(mode, questions) {
   isRetryMode = false;
   streak = 0;
   missedInSession = [];
+  coinsThisSession = 0;
   let qs = questions || [...allQuestions];
 
   if (!questions) {
-    if (mode === 'normal_first')  qs = qs.filter(q => q.row >= 2 && q.row <= 21);
-    else if (mode === 'normal_second') qs = qs.filter(q => q.row >= 22 && q.row <= 41);
-    else if (mode === 'oboeru') {
+    if (mode === 'oboeru') {
       qs = qs.filter(q => q.total === 0 || (q.correct / q.total) * 100 <= 99);
       qs = shuffleArray(qs);
     } else if (mode === 'random') {
@@ -430,9 +723,9 @@ function startMode(mode, questions) {
   currentIndex = 0;
   correctCount = 0;
 
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('weeklyBar').style.display = 'none';
+  hideAllScreens();
   document.getElementById('cardContainer').style.display = 'block';
+  setMascotSay('がんばってね！');
   showQuestion();
 }
 
@@ -442,6 +735,7 @@ function retryMissed() {
   missedInSession = [];
   isRetryMode = true;
   streak = 0;
+  coinsThisSession = 0;
 
   document.getElementById('result').style.display = 'none';
   currentQuestions = qs;
@@ -458,6 +752,12 @@ function shuffleArray(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// ===== マスコット吹き出し =====
+function setMascotSay(text) {
+  document.getElementById('mascotFace').textContent = profile.mascot;
+  document.getElementById('mascotSay').textContent = text;
 }
 
 // ===== 問題表示 =====
@@ -506,7 +806,6 @@ function flipCard() {
 // ===== 回答 =====
 function answerQuestion(isCorrect) {
   if (!isFlipped) {
-    // カードをやさしくシェイク
     const card = document.getElementById('card');
     card.style.animation = 'none';
     card.style.transform = 'translateX(-8px)';
@@ -516,29 +815,56 @@ function answerQuestion(isCorrect) {
   }
 
   const q = currentQuestions[currentIndex];
+  const prevLevel = getLevel();
 
   if (isCorrect) {
     correctCount++;
     streak++;
+    playSound('correct');
+
+    // コイン獲得（連続ボーナス）
+    let gain = 1;
+    if (streak >= 5) gain = 3;
+    else if (streak >= 3) gain = 2;
+    coinsThisSession += gain;
+    profile.totalCorrect++;
+    addCoins(gain);
+    showCoinToast(gain);
+
+    // レベルアップ判定
+    if (getLevel() > prevLevel) {
+      setTimeout(() => {
+        playSound('levelup');
+        showCelebration(`🎉 レベルアップ！ Lv.${getLevel()}`);
+        launchConfetti(35, true);
+      }, 700);
+      setMascotSay('レベルアップしたね！');
+    }
+    updateStatus();
+
     // お祝い演出
     if (streak >= 5) {
       showCelebration('🌟 すごすぎる！！');
       launchConfetti(30);
+      setMascotSay('てんさい！');
     } else if (streak >= 3) {
       showCelebration('🔥 れんぞく！');
       launchConfetti(15);
+      setMascotSay('その調子！');
     } else {
       showCelebration('✨ かけた！');
       launchConfetti(8);
+      setMascotSay('できたね！');
     }
   } else {
     streak = 0;
-    // まちがえた問題を記録（後で再出題用）
+    playSound('wrong');
     const missQ = { ...q, _isRetry: true };
     if (!missedInSession.find(m => m.row === q.row)) {
       missedInSession.push(missQ);
     }
     showNegative();
+    setMascotSay('つぎいこう！');
   }
 
   // Google Sheets更新
@@ -564,6 +890,10 @@ function showCelebration(text) {
   const ct  = document.getElementById('celebrationText');
   ct.textContent = text;
   cel.style.display = 'flex';
+  // アニメを必ず再生
+  ct.style.animation = 'none';
+  void ct.offsetWidth;
+  ct.style.animation = '';
   setTimeout(() => { cel.style.display = 'none'; }, 1000);
 }
 
@@ -572,18 +902,27 @@ function showNegative() {
   showCelebration(msgs[Math.floor(Math.random() * msgs.length)]);
 }
 
-function launchConfetti(count) {
+function launchConfetti(count, hearts) {
   const colors = ['#FF69B4','#DA70D6','#FFD700','#FF85C1','#B19CD9','#FFB6D9'];
+  const shapes = ['🌟','💖','✨','🎀','🌸'];
   for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'confetti-piece';
     el.style.left   = Math.random() * 100 + 'vw';
     el.style.top    = '-20px';
-    el.style.background = colors[Math.floor(Math.random() * colors.length)];
-    el.style.width  = (6 + Math.random() * 8) + 'px';
-    el.style.height = (6 + Math.random() * 8) + 'px';
     el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
     el.style.animationDelay   = (Math.random() * 0.5) + 's';
+    if (hearts && Math.random() < 0.5) {
+      // 絵文字の紙吹雪
+      el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+      el.style.fontSize = (14 + Math.random() * 12) + 'px';
+      el.style.background = 'transparent';
+      el.style.width = 'auto'; el.style.height = 'auto';
+    } else {
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width  = (6 + Math.random() * 8) + 'px';
+      el.style.height = (6 + Math.random() * 8) + 'px';
+    }
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3500);
   }
@@ -597,34 +936,42 @@ function showResult() {
   const pct = currentQuestions.length > 0
     ? Math.round(correctCount / currentQuestions.length * 100) : 0;
 
-  // スコアリング
   document.getElementById('scorePct').textContent = pct + '%';
   document.getElementById('scoreRing').style.setProperty('--pct', pct + '%');
 
-  // メッセージ
+  const namePrefix = profile.name ? `${profile.name}ちゃん、` : '';
   let msg = '', title = '';
   if (pct >= 90) {
     title = '🌟 かんぺき！！';
-    msg = 'てんさいだ！！すごすぎる！！';
-    launchConfetti(40);
+    msg = namePrefix + 'てんさいだ！！すごすぎる！！';
+    launchConfetti(40, true);
   } else if (pct >= 70) {
     title = '💮 よくがんばったね！';
-    msg = 'もうすぐかんぺき！この調子！';
-    launchConfetti(20);
+    msg = namePrefix + 'もうすぐかんぺき！この調子！';
+    launchConfetti(20, true);
   } else if (pct >= 50) {
     title = '✨ いいかんじ！';
-    msg = 'だんだんおぼえてきてるよ！';
+    msg = namePrefix + 'だんだんおぼえてきてるよ！';
   } else if (pct >= 30) {
     title = '💪 チャレンジ中！';
-    msg = 'まだおぼえはじめ。大丈夫！くりかえせばかならずおぼえるよ！';
+    msg = namePrefix + 'まだおぼえはじめ。大丈夫！くりかえせばかならずおぼえるよ！';
   } else {
     title = '🌱 スタートだよ！';
-    msg = 'まだおぼえたばかり。0点からでもぜんぜんOK！毎日やれば絶対かわるよ💕';
+    msg = namePrefix + 'まだおぼえたばかり。0点からでもぜんぜんOK！毎日やれば絶対かわるよ💕';
   }
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultMessage').textContent = msg;
   document.getElementById('resultStats').innerHTML =
     `かけた：${correctCount} / ${currentQuestions.length}もん<br>せいとうりつ：${pct}%`;
+
+  // コイン獲得まとめ
+  const reward = document.getElementById('resultReward');
+  if (coinsThisSession > 0) {
+    reward.style.display = 'block';
+    reward.innerHTML = `🪙 コインを ${coinsThisSession}まい ゲット！（ぜんぶで ${profile.coins}まい）<br>🎁 コレクションでガチャがひけるよ！`;
+  } else {
+    reward.style.display = 'none';
+  }
 
   // まちがえた漢字リスト
   const ml = document.getElementById('missList');
@@ -643,16 +990,21 @@ function showResult() {
     document.getElementById('retryMissBtn').style.display = 'none';
   }
 
-  // 週間記録保存
   if (!isRetryMode) saveWeekScore(correctCount, currentQuestions.length);
+  updateStatus();
 }
 
+// ===== 画面切り替え =====
+function hideAllScreens() {
+  ['menu','weeklyBar','statusBar','cardContainer','result','weakPoints','collection','settings']
+    .forEach(id => { document.getElementById(id).style.display = 'none'; });
+}
 function backToMenu() {
-  document.getElementById('result').style.display = 'none';
-  document.getElementById('weakPoints').style.display = 'none';
-  document.getElementById('cardContainer').style.display = 'none';
+  hideAllScreens();
   document.getElementById('menu').style.display = 'block';
   document.getElementById('weeklyBar').style.display = 'block';
+  document.getElementById('statusBar').style.display = 'block';
+  updateStatus();
   renderWeeklyBar();
   loadData();
 }
@@ -686,9 +1038,110 @@ function showWeakPoints() {
     }).join('');
   }
 
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('weeklyBar').style.display = 'none';
+  hideAllScreens();
   document.getElementById('weakPoints').style.display = 'block';
+}
+
+// ===== コレクション =====
+function showCollection() {
+  hideAllScreens();
+  document.getElementById('collection').style.display = 'block';
+  document.getElementById('gachaResult').className = 'gacha-result';
+  document.getElementById('gachaResult').innerHTML = '';
+  renderCollection();
+}
+function renderCollection() {
+  document.getElementById('collCoins').textContent = profile.coins;
+  document.getElementById('collProgress').textContent =
+    `あつめた数：${profile.owned.length} / ${STICKERS.length}`;
+  const grid = document.getElementById('collectionGrid');
+  grid.innerHTML = STICKERS.map(s => {
+    const owned = profile.owned.includes(s.e);
+    return `<div class="sticker-cell ${owned ? 'owned' : 'locked'}">
+      <div class="s-emoji">${owned ? s.e : '❓'}</div>
+      <div class="s-name">${owned ? s.n : '？？？'}</div>
+    </div>`;
+  }).join('');
+  const btn = document.getElementById('gachaBtn');
+  btn.disabled = profile.coins < GACHA_COST;
+}
+function drawGacha() {
+  if (profile.coins < GACHA_COST) {
+    showCelebration('🪙 コインがたりないよ！');
+    return;
+  }
+  profile.coins -= GACHA_COST;
+  playSound('gacha');
+
+  const pick = STICKERS[Math.floor(Math.random() * STICKERS.length)];
+  const isNew = !profile.owned.includes(pick.e);
+  if (isNew) profile.owned.push(pick.e);
+  else profile.coins += DUP_REFUND;
+  saveProfile();
+
+  const box = document.getElementById('gachaResult');
+  box.className = 'gacha-result show';
+  box.innerHTML = `
+    <div class="gacha-pop">${pick.e}</div>
+    <div class="gacha-name">${pick.n}</div>
+    <div class="gacha-tag">${isNew ? '🎉 あたらしくゲット！' : `🪙 ダブり！ +${DUP_REFUND}コイン`}</div>`;
+  launchConfetti(isNew ? 22 : 6, isNew);
+  if (isNew) setTimeout(() => playSound('levelup'), 250);
+
+  renderCollection();
+  updateStatus();
+}
+
+// ===== せってい =====
+function showSettings() {
+  hideAllScreens();
+  document.getElementById('settings').style.display = 'block';
+  renderSettings();
+}
+function renderSettings() {
+  document.getElementById('nameInput').value = profile.name;
+
+  // テーマ
+  const sw = document.getElementById('themeSwatches');
+  sw.innerHTML = THEMES.map(t =>
+    `<div class="theme-swatch ${profile.theme === t.id ? 'active' : ''}"
+          style="background:${t.sw}" onclick="setTheme('${t.id}')">${t.n}</div>`
+  ).join('');
+
+  // マスコット（デフォルト🦄 ＋ 手に入れたステッカー）
+  const options = ['🦄', ...profile.owned.filter(e => e !== '🦄')];
+  const mp = document.getElementById('mascotPick');
+  mp.innerHTML = options.map(e =>
+    `<div class="mascot-opt ${profile.mascot === e ? 'active' : ''}" onclick="setMascot('${e}')">${e}</div>`
+  ).join('');
+
+  // サウンド
+  const st = document.getElementById('soundToggle');
+  st.className = 'sound-toggle ' + (profile.sound ? 'on' : 'off');
+  st.textContent = profile.sound ? 'サウンド：ON 🔊' : 'サウンド：OFF 🔇';
+}
+function onNameInput(v) {
+  profile.name = v.trim();
+  saveProfile();
+  updateStatus();
+}
+function setTheme(id) {
+  profile.theme = id;
+  saveProfile();
+  applyTheme();
+  renderSettings();
+}
+function setMascot(e) {
+  profile.mascot = e;
+  saveProfile();
+  updateStatus();
+  renderSettings();
+}
+function toggleSound() {
+  profile.sound = !profile.sound;
+  saveProfile();
+  renderSettings();
+  if (profile.sound) playSound('coin');
 }
 </script>
 </body>

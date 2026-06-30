@@ -296,7 +296,7 @@ h1 {
 .gacha-btn:hover { transform: translateY(-3px) scale(1.02); }
 .gacha-btn:disabled { filter: grayscale(0.6); opacity: 0.6; cursor: not-allowed; transform: none; }
 .gacha-result { min-height: 0; text-align: center; }
-.gacha-result.show { min-height: 120px; margin-top: 14px; }
+.gacha-result.show { min-height: 150px; margin-top: 14px; }
 .gacha-pop { font-size: 4em; animation: gachaPop 0.6s ease-out; }
 @keyframes gachaPop {
   0%{transform:scale(0.2) rotate(-20deg); opacity:0;}
@@ -305,6 +305,33 @@ h1 {
 }
 .gacha-name { font-size: 1.2em; color: #DA70D6; font-weight: bold; }
 .gacha-tag { font-size: 1em; color: #E69500; margin-top: 4px; }
+/* ガチャ抽選アニメ */
+.gacha-roll { font-size: 4em; display: inline-block; animation: gachaShake 0.16s infinite; }
+@keyframes gachaShake {
+  0%   { transform: translateX(-5px) rotate(-7deg); }
+  50%  { transform: translateX(5px) rotate(7deg); }
+  100% { transform: translateX(-5px) rotate(-7deg); }
+}
+.gacha-status { color: #DA70D6; font-weight: bold; margin-top: 6px; animation: blinkText 0.7s infinite; }
+@keyframes blinkText { 50% { opacity: 0.35; } }
+/* レア度の見た目 */
+.gacha-rarity { font-size: 1.15em; font-weight: bold; margin-top: 6px; }
+.gacha-result.rev-n  .gacha-rarity { color: #b58fd0; }
+.gacha-result.rev-r  .gacha-rarity { color: #E69500; }
+.gacha-result.rev-r  .gacha-pop { filter: drop-shadow(0 0 10px rgba(255,200,0,0.7)); }
+.gacha-result.rev-sr .gacha-rarity {
+  background: linear-gradient(135deg,#FF69B4,#FFD700,#9370DB,#FF69B4);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-size: 1.4em;
+}
+.gacha-result.rev-sr .gacha-pop {
+  font-size: 5em;
+  animation: gachaPop 0.6s ease-out, srGlow 1.4s ease-in-out 0.6s infinite;
+}
+@keyframes srGlow {
+  0%,100% { filter: drop-shadow(0 0 8px rgba(255,105,180,0.7));  transform: scale(1); }
+  50%     { filter: drop-shadow(0 0 22px rgba(255,215,0,0.95)); transform: scale(1.08); }
+}
 .coll-progress { text-align:center; color:#DA70D6; font-weight:bold; margin: 8px 0 14px; }
 .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .sticker-cell {
@@ -319,6 +346,11 @@ h1 {
 .sticker-cell .s-emoji { font-size: 2em; }
 .sticker-cell.locked .s-emoji { filter: grayscale(1); opacity: 0.35; }
 .sticker-cell .s-name { font-size: 0.6em; color: #b58fd0; margin-top: 2px; }
+.sticker-cell.owned.r-r  { border-color: #FFD86B; box-shadow: 0 3px 12px rgba(255,200,0,0.3); }
+.sticker-cell.owned.r-sr {
+  border-color: #DA70D6; background: linear-gradient(135deg,#fff0f8,#f3e0ff);
+  box-shadow: 0 3px 14px rgba(218,112,214,0.45);
+}
 
 /* ===== SETTINGS ===== */
 .settings-card label {
@@ -527,12 +559,23 @@ const GACHA_COST = 10;     // ガチャ1回のコイン
 const DUP_REFUND = 3;      // ダブったときの返金コイン
 
 // ===== ステッカー図鑑 =====
+// r: レア度 n=ふつう / r=レア / sr=スーパーレア
 const STICKERS = [
-  {e:'🦄',n:'ユニコーン'},{e:'🐰',n:'うさぎ'},{e:'🐱',n:'ねこ'},{e:'🐶',n:'いぬ'},
-  {e:'🐻',n:'くま'},{e:'🐼',n:'パンダ'},{e:'🦊',n:'きつね'},{e:'🐧',n:'ペンギン'},
-  {e:'🌸',n:'さくら'},{e:'🌈',n:'にじ'},{e:'⭐',n:'スター'},{e:'🍓',n:'いちご'},
-  {e:'🧁',n:'カップケーキ'},{e:'🎀',n:'リボン'},{e:'👑',n:'おうかん'},{e:'💎',n:'ダイヤ'},
-  {e:'🦋',n:'ちょうちょ'},{e:'🌺',n:'はな'},{e:'🍭',n:'キャンディ'},{e:'🐬',n:'イルカ'}
+  // ふつう
+  {e:'🐰',n:'うさぎ',r:'n'},{e:'🐱',n:'ねこ',r:'n'},{e:'🐶',n:'いぬ',r:'n'},{e:'🐻',n:'くま',r:'n'},
+  {e:'🐼',n:'パンダ',r:'n'},{e:'🐧',n:'ペンギン',r:'n'},{e:'🐥',n:'ひよこ',r:'n'},{e:'🐹',n:'ハムスター',r:'n'},
+  {e:'🐭',n:'ねずみ',r:'n'},{e:'🐸',n:'かえる',r:'n'},{e:'🐢',n:'かめ',r:'n'},{e:'🐳',n:'くじら',r:'n'},
+  {e:'🐠',n:'さかな',r:'n'},{e:'🐝',n:'はち',r:'n'},{e:'🐞',n:'てんとうむし',r:'n'},{e:'🌸',n:'さくら',r:'n'},
+  {e:'🌷',n:'チューリップ',r:'n'},{e:'🍓',n:'いちご',r:'n'},{e:'🍇',n:'ぶどう',r:'n'},{e:'🍰',n:'ケーキ',r:'n'},
+  {e:'🍪',n:'クッキー',r:'n'},{e:'🎈',n:'ふうせん',r:'n'},
+  // レア
+  {e:'🦊',n:'きつね',r:'r'},{e:'🐬',n:'イルカ',r:'r'},{e:'🦋',n:'ちょうちょ',r:'r'},{e:'🦢',n:'はくちょう',r:'r'},
+  {e:'🌈',n:'にじ',r:'r'},{e:'⭐',n:'スター',r:'r'},{e:'🌺',n:'はな',r:'r'},{e:'🧁',n:'カップケーキ',r:'r'},
+  {e:'🍭',n:'キャンディ',r:'r'},{e:'🎀',n:'リボン',r:'r'},{e:'🌙',n:'つき',r:'r'},{e:'🍀',n:'よつば',r:'r'},
+  {e:'🪀',n:'ヨーヨー',r:'r'},{e:'🎁',n:'プレゼント',r:'r'},
+  // スーパーレア
+  {e:'🦄',n:'ユニコーン',r:'sr'},{e:'👑',n:'おうかん',r:'sr'},{e:'💎',n:'ダイヤ',r:'sr'},{e:'🌟',n:'きらきら',r:'sr'},
+  {e:'🧚',n:'ようせい',r:'sr'},{e:'🏰',n:'おしろ',r:'sr'},{e:'🦩',n:'フラミンゴ',r:'sr'},{e:'🐉',n:'ドラゴン',r:'sr'}
 ];
 
 // ===== テーマ =====
@@ -1057,7 +1100,7 @@ function renderCollection() {
   const grid = document.getElementById('collectionGrid');
   grid.innerHTML = STICKERS.map(s => {
     const owned = profile.owned.includes(s.e);
-    return `<div class="sticker-cell ${owned ? 'owned' : 'locked'}">
+    return `<div class="sticker-cell ${owned ? 'owned' : 'locked'} r-${s.r}">
       <div class="s-emoji">${owned ? s.e : '❓'}</div>
       <div class="s-name">${owned ? s.n : '？？？'}</div>
     </div>`;
@@ -1065,28 +1108,81 @@ function renderCollection() {
   const btn = document.getElementById('gachaBtn');
   btn.disabled = profile.coins < GACHA_COST;
 }
+let gachaSpinning = false;
+
+// レア度ぬきだし：5%スーパーレア / 25%レア / 70%ふつう
+function pickByRarity() {
+  const roll = Math.random() * 100;
+  const r = roll < 5 ? 'sr' : (roll < 30 ? 'r' : 'n');
+  let pool = STICKERS.filter(s => s.r === r);
+  if (pool.length === 0) pool = STICKERS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function drawGacha() {
+  if (gachaSpinning) return;
   if (profile.coins < GACHA_COST) {
     showCelebration('🪙 コインがたりないよ！');
     return;
   }
+  gachaSpinning = true;
   profile.coins -= GACHA_COST;
+  saveProfile();
+  document.getElementById('collCoins').textContent = profile.coins;
+  updateStatus();
+
+  // 結果は先に決めておく（演出はあとから）
+  const pick = pickByRarity();
+  const isNew = !profile.owned.includes(pick.e);
+
+  document.getElementById('gachaBtn').disabled = true;
+
+  const box = document.getElementById('gachaResult');
+  box.className = 'gacha-result show spinning';
+  box.innerHTML = `
+    <div class="gacha-roll" id="gachaRoll">❓</div>
+    <div class="gacha-status">ドキドキ…💓</div>`;
   playSound('gacha');
 
-  const pick = STICKERS[Math.floor(Math.random() * STICKERS.length)];
-  const isNew = !profile.owned.includes(pick.e);
+  // ルーレット：絵文字を高速で切り替え
+  const roll = document.getElementById('gachaRoll');
+  const allE = STICKERS.map(s => s.e);
+  let ticks = 0;
+  const spin = setInterval(() => {
+    roll.textContent = allE[Math.floor(Math.random() * allE.length)];
+    if (++ticks % 4 === 0) playSound('coin');
+  }, 90);
+
+  setTimeout(() => {
+    clearInterval(spin);
+    revealGacha(pick, isNew);
+    gachaSpinning = false;
+  }, 1700);
+}
+
+function revealGacha(pick, isNew) {
   if (isNew) profile.owned.push(pick.e);
   else profile.coins += DUP_REFUND;
   saveProfile();
 
+  const R = {
+    n:  { label: 'ふつう',              cls: 'rev-n',  conf: 12 },
+    r:  { label: '⭐ レア！',            cls: 'rev-r',  conf: 26 },
+    sr: { label: '🌟 スーパーレア！！',  cls: 'rev-sr', conf: 50 }
+  }[pick.r];
+
   const box = document.getElementById('gachaResult');
-  box.className = 'gacha-result show';
+  box.className = 'gacha-result show ' + R.cls;
   box.innerHTML = `
     <div class="gacha-pop">${pick.e}</div>
+    <div class="gacha-rarity">${R.label}</div>
     <div class="gacha-name">${pick.n}</div>
     <div class="gacha-tag">${isNew ? '🎉 あたらしくゲット！' : `🪙 ダブり！ +${DUP_REFUND}コイン`}</div>`;
-  launchConfetti(isNew ? 22 : 6, isNew);
-  if (isNew) setTimeout(() => playSound('levelup'), 250);
+
+  launchConfetti(R.conf, true);
+  if (pick.r === 'sr') { showCelebration('🌟 スーパーレア！！'); playSound('levelup'); }
+  else if (pick.r === 'r') { playSound('levelup'); }
+  else { playSound('coin'); }
 
   renderCollection();
   updateStatus();

@@ -785,18 +785,22 @@ async function loadData() {
 
 // ===== きょうのとっくん（ライトナー式・間隔反復） =====
 // 箱1=まいにち / 箱が上がるほど出番が減る。まちがえたら箱1に逆もどり。
-const SRS_KEY = 'kurumi_srs';
+// v2: 問題の見わけを「行番号」から「問題文＋こたえ」に変更。
+//     シートの中身を入れかえても、前の週の学習じょうたいを引きつがないようにするため。
+const SRS_KEY     = 'kurumi_srs2';
+const SRS_OLD_KEY = 'kurumi_srs';                     // v1(行番号ベース)。もう使わないので捨てる
 const SRS_INTERVAL  = { 1:1, 2:2, 3:4, 4:7, 5:14 };   // 箱ごとの「次にまた出る」日数
 const SRS_BOX_NAME  = { 1:'まいにち組', 2:'2日ごと', 3:'4日ごと', 4:'1週間ごと', 5:'2週間ごと' };
-const TODAY_SIZE = 20;   // 1回にやる問題数
-const TODAY_BOX1 = 12;   // そのうち「まいにち組(箱1)」のわく
-const TODAY_MISS = 10;   // そのうち「まえに×だった漢字」のゆうせんわく
-const TODAY_NEW  = 3;    // そのうち「はじめての漢字」のわく
+const TODAY_SIZE   = 20;   // 1回にやる問題数
+const TODAY_NEW    = 14;   // ① まだ一度も出していない問題のわく（最ゆうせん）
+const TODAY_MISS   = 10;   // ② まえに×だった漢字のわく
+const TODAY_REVIEW = 5;    // ③ 期限が古い復習のわく
 
 let srsData = loadSrs();
 let boxUpInSession = 0;
 
 function loadSrs() {
+  try { localStorage.removeItem(SRS_OLD_KEY); } catch(e) {}
   try { return JSON.parse(localStorage.getItem(SRS_KEY) || '{}'); } catch(e) { return {}; }
 }
 function saveSrs() { localStorage.setItem(SRS_KEY, JSON.stringify(srsData)); }
@@ -806,39 +810,41 @@ function todayNum() {
   const t = new Date();
   return Math.floor((t - t.getTimezoneOffset() * 60000) / 86400000);
 }
-function srsOf(row) { return srsData[row] || { b:0, d:0, h:'' }; }
+// 問題そのものを見わけるキー（行番号だとシートの入れかえでズレる）
+function srsKey(q) { return q.question + '|' + q.answer; }
+function srsOf(q)  { return srsData[srsKey(q)] || { b:0, d:0, h:'' }; }
 
-// 累計データから最初の箱を決める（新しい問題がふえたときも自動でふりわけ）
+// 累計データから最初の箱を決める（問題がふえたときも自動でふりわけ）
 function seedSrs() {
   const today = todayNum();
   let changed = false;
-  allQuestions.forEach(q => {
-    if (srsData[q.row]) return;
+  allQuestions.forEach((q, i) => {
+    const key = srsKey(q);
+    if (srsData[key]) return;
     changed = true;
-    if (q.total === 0) { srsData[q.row] = { b:0, d:today, h:'' }; return; }
+    if (q.total === 0) { srsData[key] = { b:0, d:today, h:'' }; return; }   // 未出題＝はじめて
     const acc = q.correct / q.total;
     let b;
-    if (q.correct === 0 || acc <= 1/3) b = 1;        // 3回以上ぜんぶ×など → まいにち組
+    if (q.correct === 0 || acc <= 1/3) b = 1;        // ほとんど×  → まいにち組
     else if (acc <= 0.6) b = 2;
     else if (acc < 1)    b = 3;
     else b = q.total >= 3 ? 4 : 2;                   // 3回以上ぜんぶ○ → 定着ずみ
-    // 一気に期限が来ないよう、行番号で少しずつずらす
-    srsData[q.row] = { b:b, d: today + (b === 1 ? 0 : q.row % SRS_INTERVAL[b]), h:'' };
+    srsData[key] = { b:b, d: today + (b === 1 ? 0 : i % SRS_INTERVAL[b]), h:'' };
   });
   if (changed) saveSrs();
 }
 
 function dueList() {
   const today = todayNum();
-  return allQuestions.filter(q => { const s = srsOf(q.row); return s.b >= 1 && s.d <= today; });
+  return allQuestions.filter(q => { const s = srsOf(q); return s.b >= 1 && s.d <= today; });
 }
 function newList() {
-  return allQuestions.filter(q => srsOf(q.row).b === 0);
+  return allQuestions.filter(q => srsOf(q).b === 0);   // まだ一度も出していない問題
 }
-// 苦手（箱が小さい・期限ぎれが古い・累計正答率が低い）を先頭に
+// 苦手（箱が小さい・期限ぎれが古い・正答率がひくい）を先頭に
 function weakFirst(arr) {
   return [...arr].sort((a, b) => {
-    const sa = srsOf(a.row), sb = srsOf(b.row);
+    const sa = srsOf(a), sb = srsOf(b);
     if (sa.b !== sb.b) return sa.b - sb.b;
     if (sa.d !== sb.d) return sa.d - sb.d;
     const aa = a.total ? a.correct / a.total : 0;
@@ -846,28 +852,48 @@ function weakFirst(arr) {
     return aa - ab;
   });
 }
+// 期限ぎれが古い順＝いちばん長く出ていない問題を先頭に（出番ゼロの問題を作らない）
+function overdueFirst(arr) {
+  return [...arr].sort((a, b) => {
+    const sa = srsOf(a), sb = srsOf(b);
+    if (sa.d !== sb.d) return sa.d - sb.d;
+    return sa.b - sb.b;
+  });
+}
 
 function todayQueue() {
-  const due  = weakFirst(dueList());
-  const box1 = due.filter(q => srsOf(q.row).b === 1);
-  const rest = due.filter(q => srsOf(q.row).b >= 2);
-  const news = newList().slice(0, TODAY_NEW);   // 新出はシートの順番どおり
+  const due    = overdueFirst(dueList());
+  const news   = newList();
+  const isMiss = q => srsOf(q).h.slice(-1) === 'x';
+  const box1miss = weakFirst(due.filter(q => srsOf(q).b === 1 &&  isMiss(q)));
+  const box1rest = overdueFirst(due.filter(q => srsOf(q).b === 1 && !isMiss(q)));
+  const review   = overdueFirst(due.filter(q => srsOf(q).b >= 2));
 
-  // まえに×だった漢字は、つぎの日にかならず出す（ライトナーのいちばん大事なところ）
-  const missed = box1.filter(q => srsOf(q.row).h.slice(-1) === 'x').slice(0, TODAY_MISS);
-  const other  = box1.filter(q => srsOf(q.row).h.slice(-1) !== 'x');
+  const picked = [], used = new Set();
+  const take = (list, n) => {
+    for (const q of list) {
+      if (picked.length >= TODAY_SIZE || n <= 0) break;
+      const k = srsKey(q);
+      if (used.has(k)) continue;
+      used.add(k); picked.push(q); n--;
+    }
+  };
+  // 問題数が少ないとき（週がわりの40問など）は、まず全部を一周させる
+  const newQuota = allQuestions.length <= 100 ? TODAY_NEW : 3;
+  take(news,     newQuota);       // ① まだ出していない問題を最ゆうせん
+  take(box1miss, TODAY_MISS);     // ② まえに×だった漢字
+  take(review,   TODAY_REVIEW);   // ③ 期限が古い復習から
+  take(box1rest, TODAY_SIZE);     // ④ まいにち組ののこり
+  take(review,   TODAY_SIZE);     // ⑤ さらに復習
+  take(news,     TODAY_SIZE);     // ⑥ さらに未出題
+  take(due,      TODAY_SIZE);     // ⑦ それでも足りなければ のこりぜんぶ
 
-  let picked = missed
-    .concat(other.slice(0, TODAY_BOX1 - missed.length))
-    .concat(rest.slice(0, TODAY_SIZE - TODAY_BOX1 - TODAY_NEW))
-    .concat(news);
-
-  if (picked.length < TODAY_SIZE) {   // わくが余ったら のこりで埋める
-    const used = new Set(picked.map(q => q.row));
-    const filler = due.concat(newList()).filter(q => !used.has(q.row));
-    picked = picked.concat(filler.slice(0, TODAY_SIZE - picked.length));
+  // ⑧ 期限がきている問題だけでは20問に足りないとき（問題数が少ない週など）は、
+  //    期限が近い順＝いちばん長く出ていない順に埋める。かならず20問になるように。
+  if (picked.length < TODAY_SIZE) {
+    take(overdueFirst(allQuestions.filter(q => !used.has(srsKey(q)))), TODAY_SIZE);
   }
-  return shuffleArray(picked.slice(0, TODAY_SIZE));
+  return shuffleArray(picked);
 }
 
 // ===== あさ・よるの きろく =====
@@ -924,9 +950,10 @@ function startToday() {
 }
 
 // 回答を記録して箱を動かす（○=1つ上がる／×=箱1にもどる）
-function srsRecord(row, isCorrect) {
+function srsRecord(q, isCorrect) {
   const today = todayNum();
-  const s = srsData[row] || { b:0, d:today, h:'' };
+  const key = srsKey(q);
+  const s = srsData[key] || { b:0, d:today, h:'' };
   const before = s.b;
   if (isCorrect) {
     s.b = s.b === 0 ? 2 : Math.min(s.b + 1, 5);
@@ -936,13 +963,13 @@ function srsRecord(row, isCorrect) {
     s.d = today + 1;   // まちがえたら あした また出る
   }
   s.h = (s.h + (isCorrect ? 'o' : 'x')).slice(-5);
-  srsData[row] = s;
+  srsData[key] = s;
   saveSrs();
   if (s.b > before) boxUpInSession++;
 }
 
-function recentText(row) {
-  const h = srsOf(row).h;
+function recentText(q) {
+  const h = srsOf(q).h;
   if (!h) return '';
   return 'さいきん: ' + h.split('').map(c => c === 'o' ? '○' : '×').join('');
 }
@@ -1022,9 +1049,9 @@ function showQuestion() {
   document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentQuestions.length}`;
 
   if (currentMode === 'today') {
-    const s = srsOf(q.row);
+    const s = srsOf(q);
     const boxTxt = s.b === 0 ? '🌱 はじめての漢字' : `📦${s.b} ${SRS_BOX_NAME[s.b]}`;
-    const rec = recentText(q.row);
+    const rec = recentText(q);
     document.getElementById('accuracy').innerText = boxTxt + (rec ? '　' + rec : '');
   } else if (q.total > 0) {
     const acc = Math.round(q.correct / q.total * 100);
@@ -1130,7 +1157,7 @@ function answerQuestion(isCorrect) {
     if (isCorrect) allQuestions[qi].correct++;
     allQuestions[qi].total++;
   }
-  if (!isRetryMode) srsRecord(q.row, isCorrect);
+  if (!isRetryMode) srsRecord(q, isCorrect);
   updateGoogleSheet(q.row, isCorrect);
 
   currentIndex++;

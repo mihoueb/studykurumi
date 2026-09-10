@@ -339,7 +339,12 @@ h1 {
   50%     { filter: drop-shadow(0 0 22px rgba(255,215,0,0.95)); transform: scale(1.08); }
 }
 .coll-progress { text-align:center; color:#DA70D6; font-weight:bold; margin: 8px 0 14px; }
-.collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.coll-group-title {
+  color:#DA70D6; font-weight:bold; font-size:0.95em; text-align:center;
+  margin: 14px 0 8px; padding-top: 12px; border-top: 2px dashed #f0e0f8;
+}
+.coll-group-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.coll-group-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .sticker-cell {
   aspect-ratio: 1; border-radius: 14px; display: flex;
   flex-direction: column; align-items: center; justify-content: center;
@@ -612,14 +617,27 @@ const STICKERS = [
   {e:'🐠',n:'さかな',r:'n'},{e:'🐝',n:'はち',r:'n'},{e:'🐞',n:'てんとうむし',r:'n'},{e:'🌸',n:'さくら',r:'n'},
   {e:'🌷',n:'チューリップ',r:'n'},{e:'🍓',n:'いちご',r:'n'},{e:'🍇',n:'ぶどう',r:'n'},{e:'🍰',n:'ケーキ',r:'n'},
   {e:'🍪',n:'クッキー',r:'n'},{e:'🎈',n:'ふうせん',r:'n'},
+  {e:'🐨',n:'コアラ',r:'n'},{e:'🐷',n:'ぶた',r:'n'},{e:'🐮',n:'うし',r:'n'},{e:'🐑',n:'ひつじ',r:'n'},
+  {e:'🐴',n:'うま',r:'n'},{e:'🐔',n:'にわとり',r:'n'},{e:'🦆',n:'あひる',r:'n'},{e:'🦉',n:'ふくろう',r:'n'},
+  {e:'🦔',n:'はりねずみ',r:'n'},{e:'🐌',n:'かたつむり',r:'n'},{e:'🦀',n:'かに',r:'n'},{e:'🐙',n:'たこ',r:'n'},
+  {e:'🦐',n:'えび',r:'n'},{e:'🌻',n:'ひまわり',r:'n'},{e:'🌼',n:'デイジー',r:'n'},{e:'🍎',n:'りんご',r:'n'},
+  {e:'🍊',n:'みかん',r:'n'},{e:'🍑',n:'もも',r:'n'},{e:'🍉',n:'すいか',r:'n'},{e:'🍌',n:'バナナ',r:'n'},
+  {e:'🍩',n:'ドーナツ',r:'n'},{e:'🍮',n:'プリン',r:'n'},{e:'🎨',n:'えのぐ',r:'n'},{e:'📚',n:'ほん',r:'n'},
   // レア
   {e:'🦊',n:'きつね',r:'r'},{e:'🐬',n:'イルカ',r:'r'},{e:'🦋',n:'ちょうちょ',r:'r'},{e:'🦢',n:'はくちょう',r:'r'},
   {e:'🌈',n:'にじ',r:'r'},{e:'⭐',n:'スター',r:'r'},{e:'🌺',n:'はな',r:'r'},{e:'🧁',n:'カップケーキ',r:'r'},
   {e:'🍭',n:'キャンディ',r:'r'},{e:'🎀',n:'リボン',r:'r'},{e:'🌙',n:'つき',r:'r'},{e:'🍀',n:'よつば',r:'r'},
   {e:'🪀',n:'ヨーヨー',r:'r'},{e:'🎁',n:'プレゼント',r:'r'},
+  {e:'🦁',n:'ライオン',r:'r'},{e:'🐯',n:'とら',r:'r'},{e:'🐺',n:'おおかみ',r:'r'},{e:'🦌',n:'しか',r:'r'},
+  {e:'🦒',n:'キリン',r:'r'},{e:'🐘',n:'ぞう',r:'r'},{e:'🦓',n:'シマウマ',r:'r'},{e:'🦜',n:'インコ',r:'r'},
+  {e:'🦚',n:'くじゃく',r:'r'},{e:'🦈',n:'さめ',r:'r'},{e:'🐡',n:'ふぐ',r:'r'},{e:'🌊',n:'なみ',r:'r'},
+  {e:'🍨',n:'アイス',r:'r'},{e:'🍫',n:'チョコ',r:'r'},{e:'🧸',n:'くまのぬいぐるみ',r:'r'},{e:'🎠',n:'メリーゴーランド',r:'r'},
+  {e:'🎡',n:'かんらんしゃ',r:'r'},{e:'🍒',n:'さくらんぼ',r:'r'},{e:'🌵',n:'サボテン',r:'r'},{e:'🎵',n:'おんぷ',r:'r'},
   // スーパーレア
   {e:'🦄',n:'ユニコーン',r:'sr'},{e:'👑',n:'おうかん',r:'sr'},{e:'💎',n:'ダイヤ',r:'sr'},{e:'🌟',n:'きらきら',r:'sr'},
-  {e:'🧚',n:'ようせい',r:'sr'},{e:'🏰',n:'おしろ',r:'sr'},{e:'🦩',n:'フラミンゴ',r:'sr'},{e:'🐉',n:'ドラゴン',r:'sr'}
+  {e:'🧚',n:'ようせい',r:'sr'},{e:'🏰',n:'おしろ',r:'sr'},{e:'🦩',n:'フラミンゴ',r:'sr'},{e:'🐉',n:'ドラゴン',r:'sr'},
+  {e:'🧜',n:'にんぎょ',r:'sr'},{e:'🧞',n:'ランプのまじん',r:'sr'},{e:'🦕',n:'きょうりゅう',r:'sr'},{e:'🌠',n:'ながれぼし',r:'sr'},
+  {e:'🎆',n:'はなび',r:'sr'},{e:'🚀',n:'ロケット',r:'sr'},{e:'🪐',n:'わくせい',r:'sr'},{e:'🏆',n:'トロフィー',r:'sr'}
 ];
 
 // ===== テーマ =====
@@ -1354,25 +1372,41 @@ function renderCollection() {
   document.getElementById('collCoins').textContent = profile.coins;
   document.getElementById('collProgress').textContent =
     `あつめた数：${profile.owned.length} / ${STICKERS.length}`;
+  // レア度ごとにわけて表示（種類がふえたので、どこまで集まったか分かりやすく）
   const grid = document.getElementById('collectionGrid');
-  grid.innerHTML = STICKERS.map(s => {
-    const owned = profile.owned.includes(s.e);
-    return `<div class="sticker-cell ${owned ? 'owned' : 'locked'} r-${s.r}">
-      <div class="s-emoji">${owned ? s.e : '❓'}</div>
-      <div class="s-name">${owned ? s.n : '？？？'}</div>
-    </div>`;
+  const GROUPS = [
+    { r:'n',  title:'ふつう' },
+    { r:'r',  title:'⭐ レア' },
+    { r:'sr', title:'🌟 スーパーレア' }
+  ];
+  grid.innerHTML = GROUPS.map(g => {
+    const list = STICKERS.filter(s => s.r === g.r);
+    const got  = list.filter(s => profile.owned.includes(s.e)).length;
+    const cells = list.map(s => {
+      const owned = profile.owned.includes(s.e);
+      return `<div class="sticker-cell ${owned ? 'owned' : 'locked'} r-${s.r}">
+        <div class="s-emoji">${owned ? s.e : '❓'}</div>
+        <div class="s-name">${owned ? s.n : '？？？'}</div>
+      </div>`;
+    }).join('');
+    return `<div class="coll-group-title">${g.title}　${got} / ${list.length}</div>
+      <div class="coll-group-grid">${cells}</div>`;
   }).join('');
   const btn = document.getElementById('gachaBtn');
   btn.disabled = profile.coins < GACHA_COST;
 }
 let gachaSpinning = false;
 
-// レア度ぬきだし：5%スーパーレア / 25%レア / 70%ふつう
+// レア度ぬきだし：7%スーパーレア / 28%レア / 65%ふつう
 function pickByRarity() {
   const roll = Math.random() * 100;
-  const r = roll < 5 ? 'sr' : (roll < 30 ? 'r' : 'n');
+  const r = roll < 7 ? 'sr' : (roll < 35 ? 'r' : 'n');
   let pool = STICKERS.filter(s => s.r === r);
   if (pool.length === 0) pool = STICKERS;
+  // まだ持っていないステッカーが出やすくなるように（70%）。
+  // 種類がふえてもコレクションが進むようにするため。ぜんぶ持っていたらふつうに抽選。
+  const fresh = pool.filter(s => !profile.owned.includes(s.e));
+  if (fresh.length > 0 && Math.random() < 0.7) pool = fresh;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 

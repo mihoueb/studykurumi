@@ -514,7 +514,6 @@ h1 {
     <div class="streak-badge" id="streakBadge"></div>
     <div class="retry-banner" id="retryBanner">
       <p>💪 さっきまちがえた漢字だよ！もう一回チャレンジ！</p>
-      <span id="retryWord"></span>
     </div>
     <div class="card" id="card" onclick="flipCard()">
       <div class="card-front">
@@ -1087,14 +1086,9 @@ function showQuestion() {
     sb.style.display = 'none';
   }
 
-  // リトライバナー
+  // リトライバナー（こたえは出さない。カードをめくるまで見えないようにする）
   const rb = document.getElementById('retryBanner');
-  if (q._isRetry) {
-    rb.style.display = 'block';
-    document.getElementById('retryWord').textContent = q.answer;
-  } else {
-    rb.style.display = 'none';
-  }
+  rb.style.display = q._isRetry ? 'block' : 'none';
 
   isFlipped = false;
   document.getElementById('card').classList.remove('flipped');
